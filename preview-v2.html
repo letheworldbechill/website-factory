@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Website Factory — Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: "DM Mono", monospace; background: #0c0c0f; color: #e2e2e6; }
+
+.shell {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  grid-template-rows: 48px 1fr;
+  height: 100vh;
+}
+
+/* ── Topbar ── */
+.topbar {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 16px;
+  background: #111116;
+  border-bottom: 1px solid #1e1e28;
+  z-index: 20;
+}
+.topbar__logo { font-family: "Syne", sans-serif; font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+.topbar__logo span { color: #7c6af7; }
+.topbar__sep  { width: 1px; height: 20px; background: #1e1e28; }
+.topbar__status { font-size: 11px; color: #5a5a7a; margin-left: auto; padding: 3px 8px; border: 1px solid #1e1e28; border-radius: 4px; }
+.topbar__status.ok  { color: #4ade80; border-color: rgba(74,222,128,.3); }
+.topbar__status.err { color: #f87171; border-color: rgba(248,113,113,.3); }
+
+/* ── Sidebar ── */
+.sidebar {
+  background: #111116;
+  border-right: 1px solid #1e1e28;
+  display: flex; flex-direction: column;
+  overflow: hidden;            /* outer: no scroll */
+}
+.sidebar__scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar__scroll::-webkit-scrollbar { width: 4px; }
+.sidebar__scroll::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 2px; }
+
+/* ── Sidebar footer (actions) — always visible ── */
+/* BUG-I fix: actions outside scroll area, always at bottom */
+.sidebar__footer {
+  flex-shrink: 0;
+  border-top: 1px solid #1e1e28;
+  padding: 10px 16px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+  background: #111116;
+}
+.shortcut-hint { font-size: 9px; color: #3a3a5a; text-align: center; padding-bottom: 6px; }
+kbd { background: #1e1e28; border-radius: 2px; padding: 1px 4px; color: #5a5a7a; font-size: 9px; }
+
+.sec-header { padding: 10px 16px 4px; font-size: 9px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: #3a3a5a; }
+.ctrl { padding: 3px 16px 8px; display: flex; flex-direction: column; gap: 4px; }
+.ctrl label { font-size: 10px; color: #5a5a7a; display: flex; justify-content: space-between; align-items: center; }
+
+select, input[type=text], textarea {
+  width: 100%; background: #0c0c0f; border: 1px solid #1e1e28; border-radius: 4px;
+  color: #c0c0d8; font-family: "DM Mono", monospace; font-size: 11px;
+  padding: 5px 8px; outline: none; transition: border-color .15s;
+}
+select:focus, input[type=text]:focus, textarea:focus { border-color: #7c6af7; box-shadow: 0 0 0 2px rgba(124,106,247,.15); }
+select option { background: #111116; }
+textarea { resize: vertical; min-height: 200px; font-size: 10px; line-height: 1.6; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 3px 16px 8px; }
+.chip { padding: 3px 8px; border-radius: 3px; font-size: 10px; border: 1px solid #1e1e28; background: #0c0c0f; color: #5a5a7a; cursor: pointer; transition: all .12s; white-space: nowrap; }
+.chip:hover  { border-color: #7c6af7; color: #9090d0; }
+.chip.active { background: #7c6af7; border-color: #7c6af7; color: #fff; }
+
+.slider-row { display: flex; align-items: center; gap: 8px; padding: 3px 16px 8px; }
+.slider-row label { font-size: 10px; color: #5a5a7a; width: 90px; white-space: nowrap; flex-shrink: 0; }
+.slider-row input[type=range] { flex:1; -webkit-appearance:none; height:3px; background:#1e1e28; border-radius:2px; border:none; padding:0; }
+.slider-row input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; background:#7c6af7; border-radius:50%; cursor:pointer; box-shadow:0 0 0 2px rgba(124,106,247,.3); }
+.slider-row .val { font-size: 10px; color: #9090b0; width: 28px; text-align: right; }
+
+.color-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 3px 16px 8px; }
+.color-item { display: flex; flex-direction: column; gap: 3px; }
+.color-item label { font-size: 10px; color: #5a5a7a; }
+.color-item input[type=color] { width:100%; height:28px; padding:2px 4px; background:#0c0c0f; border:1px solid #1e1e28; border-radius:4px; cursor:pointer; }
+
+.mode-tabs { display: flex; padding: 10px 16px 0; }
+.mode-tab { flex:1; padding:5px 0; font-size:10px; font-family:"DM Mono",monospace; text-align:center; border:1px solid #1e1e28; background:#0c0c0f; color:#5a5a7a; cursor:pointer; transition:all .12s; }
+.mode-tab:first-child { border-radius: 4px 0 0 4px; }
+.mode-tab:last-child  { border-radius: 0 4px 4px 0; border-left: none; }
+.mode-tab.active { background: #1a1a2e; color: #9090d0; border-color: #7c6af7; }
+
+/* BUG-J fix: error banner visible in both modes */
+.error-banner { display:none; margin: 0 16px 8px; padding:8px 10px; background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.25); border-radius:4px; font-size:10px; color:#f87171; white-space:pre-wrap; word-break:break-all; }
+.error-banner.show { display: block; }
+
+.btn-compile { padding:8px 16px; background:#7c6af7; border:none; border-radius:4px; color:#fff; font-family:"DM Mono",monospace; font-size:11px; font-weight:500; cursor:pointer; transition:all .15s; letter-spacing:.04em; }
+.btn-compile:hover  { background:#9482ff; transform:translateY(-1px); box-shadow:0 4px 12px rgba(124,106,247,.4); }
+.btn-compile:active { transform:translateY(0); }
+.btn-secondary { padding:6px 16px; background:transparent; border:1px solid #1e1e28; border-radius:4px; color:#5a5a7a; font-family:"DM Mono",monospace; font-size:10px; cursor:pointer; transition:all .12s; text-align:center; }
+.btn-secondary:hover { border-color:#3a3a5a; color:#9090b0; }
+
+/* ── Preview ── */
+.preview-wrap {
+  position: relative;
+  display: flex; flex-direction: column;
+  background: #0a0a0d;
+  overflow: hidden;
+  min-width: 0;       /* BUG-E fix: flex child doesn't overflow */
+}
+
+.preview-toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: #0e0e14;
+  border-bottom: 1px solid #1e1e28;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.preview-toolbar__traffic { display:flex; gap:5px; }
+.dot { width:10px; height:10px; border-radius:50%; }
+.dot-r { background:#f87171; opacity:.6; } .dot-y { background:#fbbf24; opacity:.6; } .dot-g { background:#4ade80; opacity:.6; }
+.preview-toolbar__viewport { display:flex; gap:2px; margin-left:auto; }
+.vp-btn { padding:3px 8px; background:transparent; border:1px solid #1e1e28; border-radius:3px; color:#5a5a7a; font-size:10px; font-family:"DM Mono",monospace; cursor:pointer; transition:all .1s; }
+.vp-btn.active, .vp-btn:hover { border-color:#7c6af7; color:#9090d0; }
+
+/* BUG-B fix: iframe fills remaining height via flex, not hardcoded calc */
+/* BUG-C fix: spinner layered above iframe with z-index */
+.preview-frame-wrap {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 16px;
+  position: relative;          /* for spinner absolute positioning */
+  background: repeating-linear-gradient(45deg, #0a0a0d 0px, #0a0a0d 10px, #0c0c10 10px, #0c0c10 20px);
+}
+.preview-frame-wrap::-webkit-scrollbar { width:6px; height:6px; }
+.preview-frame-wrap::-webkit-scrollbar-thumb { background:#2a2a3a; border-radius:3px; }
+
+iframe {
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px #1e1e28, 0 20px 60px rgba(0,0,0,.5);
+  background: #fff;
+  /* BUG-B fix: height fills the frame-wrap */
+  height: 100%;
+  min-height: 600px;
+  transition: width .3s cubic-bezier(.16,1,.3,1);
+  flex-shrink: 0;
+}
+
+/* BUG-C fix: spinner above everything in the frame wrap */
+.spinner {
+  display: none;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  width: 28px; height: 28px;
+  border: 2px solid #1e1e28;
+  border-top-color: #7c6af7;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  pointer-events: none;
+}
+.spinner.show { display: block; }
+@keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="topbar">
+    <div class="topbar__logo">Website<span>Factory</span></div>
+    <div class="topbar__sep"></div>
+    <div class="topbar__logo" style="font-size:11px;font-weight:600;color:#5a5a7a;">Preview v2</div>
+    <div id="statusBadge" class="topbar__status">—</div>
+  </header>
+
+  <aside class="sidebar">
+
+    <!-- scrollable content -->
+    <div class="sidebar__scroll">
+
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="visual" onclick="setMode('visual')">Visual</button>
+        <button class="mode-tab"        data-mode="dsl"    onclick="setMode('dsl')">DSL JSON</button>
+      </div>
+
+      <!-- ── Visual Panel ── -->
+      <div id="visualPanel">
+
+        <div class="sec-header">Site</div>
+        <div class="ctrl">
+          <label>Name</label>
+          <input type="text" id="siteName" value="Muster Treuhand AG" oninput="syncFromVisual()">
+        </div>
+        <div class="ctrl">
+          <label>Branche</label>
+          <select id="industry" onchange="syncFromVisual()">
+            <option value="treuhand" selected>Treuhand</option>
+            <option value="kanzlei">Kanzlei</option>
+            <option value="it">IT</option>
+            <option value="saas">SaaS</option>
+            <option value="handwerk">Handwerk</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="medizin">Medizin</option>
+            <option value="coaching">Coaching</option>
+            <option value="bildung">Bildung</option>
+            <option value="immobilien">Immobilien</option>
+            <option value="generic">Generisch</option>
+          </select>
+        </div>
+        <div class="ctrl">
+          <label>Page-Typ</label>
+          <select id="pageType" onchange="syncFromVisual()">
+            <option value="landing" selected>Landing</option>
+            <option value="sales">Sales</option>
+            <option value="company">Company</option>
+            <option value="portfolio">Portfolio</option>
+            <option value="onepage">One-Page</option>
+          </select>
+        </div>
+
+        <div class="sec-header">Theme</div>
+        <div class="chips" id="presetChips">
+          <div class="chip active" data-preset="swiss"                 onclick="setPreset(this)">swiss</div>
+          <div class="chip"        data-preset="editorial"             onclick="setPreset(this)">editorial</div>
+          <div class="chip"        data-preset="glass"                 onclick="setPreset(this)">glass</div>
+          <div class="chip"        data-preset="signature"             onclick="setPreset(this)">signature</div>
+          <div class="chip"        data-preset="clear4-default"        onclick="setPreset(this)">c4·default</div>
+          <div class="chip"        data-preset="clear4-handwerk"       onclick="setPreset(this)">c4·handwerk</div>
+          <div class="chip"        data-preset="clear4-landwirtschaft" onclick="setPreset(this)">c4·agri</div>
+          <div class="chip"        data-preset="clear4-premium"        onclick="setPreset(this)">c4·premium</div>
+          <div class="chip"        data-preset="clear4-dark"           onclick="setPreset(this)">c4·dark</div>
+        </div>
+
+        <div class="sec-header">Density &amp; Scale</div>
+        <div class="ctrl">
+          <label>Density</label>
+          <select id="density" onchange="syncFromVisual()">
+            <option value="compact">Compact</option>
+            <option value="balanced" selected>Balanced</option>
+            <option value="airy">Airy</option>
+          </select>
+        </div>
+        <div class="slider-row">
+          <label>Spacing</label>
+          <input type="range" id="spacingScale" min="0.6" max="1.6" step="0.05" value="1.0"
+                 oninput="document.getElementById('spacingVal').textContent=parseFloat(this.value).toFixed(2);syncFromVisual()">
+          <span class="val" id="spacingVal">1.00</span>
+        </div>
+        <div class="ctrl">
+          <label>Radius</label>
+          <select id="radius" onchange="syncFromVisual()">
+            <option value="none">none</option>
+            <option value="subtle">subtle</option>
+            <option value="default" selected>default</option>
+            <option value="round">round</option>
+            <option value="pill">pill</option>
+          </select>
+        </div>
+
+        <div class="sec-header">Brand Colors <span style="color:#3a3a5a;font-size:8px;">(override)</span></div>
+        <div class="color-row">
+          <div class="color-item"><label>Primary</label><input type="color" id="colorPrimary" value="#1a365d" oninput="syncFromVisual()"></div>
+          <div class="color-item"><label>Accent</label><input type="color"  id="colorAccent"  value="#38a169" oninput="syncFromVisual()"></div>
+          <div class="color-item"><label>Background</label><input type="color" id="colorBg"   value="#ffffff" oninput="syncFromVisual()"></div>
+          <div class="color-item"><label>Text</label><input type="color"    id="colorText"    value="#0a0a0a" oninput="syncFromVisual()"></div>
+        </div>
+
+        <div class="sec-header">Complexity</div>
+        <div class="chips">
+          <div class="chip"        data-c="1" onclick="setComplexity(this)">1 · minimal</div>
+          <div class="chip"        data-c="3" onclick="setComplexity(this)">3 · basic</div>
+          <div class="chip active" data-c="5" onclick="setComplexity(this)">5 · standard</div>
+          <div class="chip"        data-c="8" onclick="setComplexity(this)">8 · full</div>
+        </div>
+
+      </div><!-- /visualPanel -->
+
+      <!-- ── DSL Panel ── -->
+      <div id="dslPanel" style="display:none;padding:8px 0 0;">
+        <div class="ctrl">
+          <label>DSL JSON</label>
+          <textarea id="dslEditor" spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <!-- BUG-J fix: error banner outside panels, always visible -->
+      <div id="errorBanner" class="error-banner"></div>
+
+    </div><!-- /sidebar__scroll -->
+
+    <!-- BUG-I fix: actions outside scroll, always pinned -->
+    <div class="sidebar__footer">
+      <div class="shortcut-hint"><kbd>⌘ Enter</kbd> oder <kbd>Ctrl Enter</kbd> kompilieren</div>
+      <button class="btn-compile" onclick="compile()">▶ Kompilieren</button>
+      <button class="btn-secondary" onclick="downloadHTML()">↓ HTML exportieren</button>
+      <button class="btn-secondary" onclick="copyDSL(this)">⧉ DSL kopieren</button>
+      <button class="btn-secondary" onclick="resetToExample()">↺ Beispiel laden</button>
+    </div>
+
+  </aside>
+
+  <!-- Preview -->
+  <div class="preview-wrap">
+    <div class="preview-toolbar">
+      <div class="preview-toolbar__traffic">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      </div>
+      <div id="previewUrl" style="font-size:10px;color:#3a3a5a;margin-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px;">—</div>
+      <div class="preview-toolbar__viewport">
+        <!-- BUG-E fix: Desktop uses 'fill' not '100%' — handled in JS -->
+        <button class="vp-btn active" data-w="fill"  onclick="setViewport(this)">Desktop</button>
+        <button class="vp-btn"        data-w="768px" onclick="setViewport(this)">Tablet</button>
+        <button class="vp-btn"        data-w="375px" onclick="setViewport(this)">Mobile</button>
+      </div>
+    </div>
+
+    <div class="preview-frame-wrap" id="frameWrap">
+      <div class="spinner" id="spinner"></div>
+      <!-- BUG-B fix: no inline height; flex parent handles it -->
+      <iframe id="previewFrame" style="width:100%;"></iframe>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<script type="module">
+// ════════════════════════════════════════════════
+// ENGINE BUNDLE
+// ════════════════════════════════════════════════
+// Website Factory Engine Bundle — auto-generated
+/**
+ * engine/escape.js
+ *
+ * HTML-Escaping für alle user-generierten Inhalte.
+ * Verhindert XSS-Angriffe durch injection in Templates.
+ *
+ * Regel: ALLE Werte aus DSL.data, DSL.items, DSL.site.name etc.
+ *        müssen durch esc() laufen bevor sie in HTML-Attribute
+ *        oder Text-Content eingefügt werden.
+ */
+
+const ESC_MAP = {
+  "&":  "&amp;",
+  "<":  "&lt;",
+  ">":  "&gt;",
+  '"':  "&quot;",
+  "'":  "&#x27;",
+  "/":  "&#x2F;",
+  "`":  "&#x60;",
+}
+
+/**
+ * Escaped einen String für sichere HTML-Ausgabe.
+ * Gibt leeren String zurück wenn value null/undefined/falsy ist.
+ *
+ * @param {any}    value - Zu escapender Wert
+ * @returns {string}     - Sicherer HTML-String
+ */
+export function esc(value) {
+  if (value === null || value === undefined) return ""
+  return String(value).replace(/[&<>"'`/]/g, c => ESC_MAP[c])
+}
+
+/**
+ * Escaped einen URL-Wert für href/src-Attribute.
+ * Blockt javascript:-URLs und data:- URLs.
+ *
+ * @param {string} url
+ * @returns {string}
+ */
+export function escUrl(url) {
+  if (!url) return "#"
+  const s = String(url).trim()
+  // javascript: und data: sind gefährlich
+  if (/^(javascript|data|vbscript):/i.test(s)) return "#"
+  return esc(s)
+}
+
+/**
+ * engine/ids.js
+ *
+ * ID-Generierung für Sections.
+ * Kein crypto-Modul nötig — läuft in Browser und Node.
+ */
+
+const CHARS = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+/**
+ * Erzeugt eine kurze zufällige ID (4 Zeichen).
+ * Format: "a1b2"
+ */
+function shortId(length = 4) {
+  let id = ""
+  for (let i = 0; i < length; i++) {
+    id += CHARS[Math.floor(Math.random() * CHARS.length)]
+  }
+  return id
+}
+
+/**
+ * Erzeugt eine Section-ID im Format "<type>-<shortid>".
+ * Beispiel: "hero-a1b2", "services-x9y8"
+ */
+export function sectionId(type) {
+  return `${type}-${shortId()}`
+}
+
+/**
+ * engine/defaults.js
+ *
+ * Default-Werte für alle Section-Typen.
+ * Parser und Section Composer benutzen diese als Fallback.
+ */
+
+// ── Default Areas (Fibonacci-Gewichte) ───────────────────────────────────────
+
+export const DEFAULT_AREAS = {
+  header:       { content: 1 },
+  hero:         { content: 8, image: 5 },
+  trust:        { content: 1 },
+  authority:    { content: 1 },
+  services:     { grid: 3 },
+  benefits:     { list: 3 },
+  process:      { grid: 2 },
+  team:         { grid: 3 },
+  gallery:      { grid: 5 },
+  testimonials: { grid: 3 },
+  faq:          { content: 1 },
+  cta:          { content: 1 },
+  footer:       { content: 1 },
+  contact:      { content: 1 },
+  pricing:      { grid: 3 },
+  custom:       { content: 1 },
+}
+
+// ── Default Data (leere Platzhalter) ─────────────────────────────────────────
+
+export const DEFAULT_DATA = {
+  header:       { title: "" },
+  hero:         { title: "", subtitle: "", ctaPrimary: "", ctaPrimaryUrl: "#kontakt" },
+  trust:        { title: "" },
+  authority:    { title: "", body: "" },
+  services:     { label: "Leistungen", title: "", subtitle: "" },
+  benefits:     { label: "Vorteile",   title: "", subtitle: "" },
+  process:      { label: "Ablauf",     title: "" },
+  team:         { label: "Team",       title: "" },
+  gallery:      { label: "Galerie",    title: "" },
+  testimonials: { label: "Stimmen",   title: "" },
+  faq:          { label: "FAQ",        title: "" },
+  cta:          { title: "", subtitle: "", ctaPrimary: "", ctaPrimaryUrl: "#kontakt" },
+  footer:       { title: "" },
+  contact:      { label: "Kontakt",    title: "" },
+  pricing:      { label: "Preise",     title: "" },
+  custom:       {},
+}
+
+// ── Default Settings ──────────────────────────────────────────────────────────
+
+export const DEFAULT_SETTINGS = {
+  header:       { background: "default", paddingTop: "none",  paddingBottom: "none" },
+  hero:         { background: "default", paddingTop: "xl",    paddingBottom: "xl"   },
+  trust:        { background: "alt",     paddingTop: "md",    paddingBottom: "md",   textAlign: "center" },
+  authority:    { background: "default", paddingTop: "lg",    paddingBottom: "lg"   },
+  services:     { background: "default", paddingTop: "lg",    paddingBottom: "lg"   },
+  benefits:     { background: "alt",     paddingTop: "lg",    paddingBottom: "lg"   },
+  process:      { background: "default", paddingTop: "lg",    paddingBottom: "lg"   },
+  team:         { background: "default", paddingTop: "lg",    paddingBottom: "lg"   },
+  gallery:      { background: "alt",     paddingTop: "lg",    paddingBottom: "lg"   },
+  testimonials: { background: "alt",     paddingTop: "lg",    paddingBottom: "lg"   },
+  faq:          { background: "default", paddingTop: "lg",    paddingBottom: "lg"   },
+  cta:          { background: "brand",   paddingTop: "xl",    paddingBottom: "xl",   textAlign: "center" },
+  footer:       { background: "dark",    paddingTop: "lg",    paddingBottom: "lg"   },
+  contact:      { background: "default", paddingTop: "lg",    paddingBottom: "lg"   },
+  pricing:      { background: "default", paddingTop: "lg",    paddingBottom: "lg"   },
+  custom:       { background: "default", paddingTop: "lg",    paddingBottom: "lg"   },
+}
+
+/**
+ * engine/graph.js
+ *
+ * Gerichteter Graph der erlaubten Section-Übergänge.
+ * Erzwingt einen sinnvollen Story-Flow ohne starre Templates.
+ *
+ * G = (V, E) wobei V = Section-Typen, E = erlaubte Nachfolger
+ *
+ * DESIGNPRINZIP: Der Graph muss alle realen industry×complexity Kombinationen
+ * abdecken, die pageComposer.js erzeugen kann. Jede Kante die pageComposer
+ * braucht muss hier vorhanden sein.
+ */
+
+export const GRAPH = {
+  header:       ["hero"],
+  hero:         ["trust", "authority", "services", "benefits", "process", "gallery", "cta"],
+  trust:        ["authority", "services", "benefits", "process", "team"],
+  authority:    ["services", "benefits", "process", "pricing", "faq"],
+  services:     ["process", "testimonials", "benefits", "pricing", "team", "gallery", "faq", "cta"],
+  benefits:     ["process", "testimonials", "pricing", "faq", "cta"],
+  process:      ["testimonials", "team", "gallery", "faq", "cta"],
+  team:         ["testimonials", "gallery", "contact", "faq", "cta"],
+  gallery:      ["testimonials", "cta"],
+  testimonials: ["faq", "cta", "contact", "pricing"],
+  faq:          ["cta", "contact"],
+  pricing:      ["faq", "cta"],
+  contact:      ["footer"],
+  cta:          ["footer", "contact"],
+  footer:       [],  // Endknoten
+  custom:       [],  // Endknoten — custom kann überall stehen
+}
+
+/**
+ * Prüft ob ein Übergang von source → target erlaubt ist.
+ */
+export function isValidTransition(source, target) {
+  return GRAPH[source]?.includes(target) ?? false
+}
+
+/**
+ * Prüft ob eine Section-Reihenfolge graph-konform ist.
+ * Gibt ein Array der Verstösse zurück (leer = valide).
+ *
+ * @param {string[]} sequence - z.B. ["hero", "trust", "services", "cta", "footer"]
+ * @returns {string[]}        - Verstösse
+ */
+export function validateSequence(sequence) {
+  const violations = []
+
+  for (let i = 0; i < sequence.length - 1; i++) {
+    const from = sequence[i]
+    const to   = sequence[i + 1]
+
+    if (!(from in GRAPH)) {
+      violations.push(`Unbekannter Section-Typ: '${from}'`)
+      continue
+    }
+
+    // header und custom sind permissiv — dürfen überall stehen
+    if (from === "header" || from === "custom" || to === "custom") continue
+
+    if (!isValidTransition(from, to)) {
+      violations.push(`Ungültiger Übergang: '${from}' → '${to}'`)
+    }
+  }
+
+  return violations
+}
+
+/**
+ * Gibt alle bekannten Section-Typen zurück.
+ */
+export function allSectionTypes() {
+  return Object.keys(GRAPH)
+}
+
+/**
+ * engine/parser.js
+ *
+ * Wandelt beliebig unvollständige Inputs in eine normierte, vollständige
+ * DSL-Struktur um. Der Parser ist der einzige Ort, an dem Defaults gesetzt
+ * und Kurzformen in Vollformen umgewandelt werden.
+ *
+ * Regel: Nach dem Parser ist die DSL immer vollständig und gültig.
+ */
+
+// ── Site-Defaults ─────────────────────────────────────────────────────────────
+
+const SITE_DEFAULTS = {
+  language:   "de-CH",
+  pageType:   "landing",
+  complexity: 5,
+}
+
+const THEME_DEFAULTS = {
+  preset:       "swiss",
+  density:      "balanced",
+  spacingScale: 1.0,
+}
+
+// ── Haupt-Parser ──────────────────────────────────────────────────────────────
+
+/**
+ * Parst einen beliebigen Input in eine vollständige DSL.
+ *
+ * @param {object} input - Rohe Eingabe (kann unvollständig sein)
+ * @returns {object}     - Vollständige, normierte DSL
+ */
+export function parse(input) {
+  if (!input || typeof input !== "object") {
+    throw new Error("Parser: Input muss ein Objekt sein")
+  }
+
+  return {
+    version: "1.0",
+    site:    parseSite(input.site || input),
+    theme:   parseTheme(input.theme || {}),
+    pages:   parsePages(input.pages || [], input.site || input),
+    seo:     parseSeo(input.seo || {}, input.site || input),
+    tracking: input.tracking || {},
+    legal:   parseLegal(input.legal || {}, input.site || input),
+    assets:  input.assets || {},
+  }
+}
+
+// ── Site ──────────────────────────────────────────────────────────────────────
+
+function parseSite(raw) {
+  if (!raw.name)     throw new Error("Parser: site.name ist Pflichtfeld")
+  if (!raw.industry) throw new Error("Parser: site.industry ist Pflichtfeld")
+
+  return {
+    name:       raw.name,
+    language:   raw.language   || SITE_DEFAULTS.language,
+    industry:   raw.industry,
+    pageType:   raw.pageType   || SITE_DEFAULTS.pageType,
+    complexity: raw.complexity || SITE_DEFAULTS.complexity,
+    domain:     raw.domain     || "",
+    tagline:    raw.tagline    || "",
+    contact:    parseContact(raw.contact || {}),
+  }
+}
+
+function parseContact(raw) {
+  return {
+    email:   raw.email   || "",
+    phone:   raw.phone   || "",
+    address: raw.address || "",
+    city:    raw.city    || "",
+    zip:     raw.zip     || "",
+    country: raw.country || "CH",
+  }
+}
+
+// ── Theme ─────────────────────────────────────────────────────────────────────
+
+function parseTheme(raw) {
+  return {
+    preset:       raw.preset       || THEME_DEFAULTS.preset,
+    density:      raw.density      || THEME_DEFAULTS.density,
+    spacingScale: raw.spacingScale || THEME_DEFAULTS.spacingScale,
+    brand:        raw.brand        || {},
+    font:         raw.font         || {},
+    radius:       raw.radius       || "default",
+    motion:       raw.motion       || "default",
+  }
+}
+
+// ── Pages ─────────────────────────────────────────────────────────────────────
+
+function parsePages(rawPages, site) {
+  // Keine Pages angegeben → eine Standardseite erzeugen
+  if (!rawPages || rawPages.length === 0) {
+    return [{ id: "home", kind: site.pageType || "landing", sections: [] }]
+  }
+  return rawPages.map((raw, idx) => parsePage(raw, idx))
+}
+
+function parsePage(raw, idx = 0) {
+  // BUG-6 Fix: Fehlende id bekommt einen Index-basierten Fallback
+  const id = raw.id || (idx === 0 ? "home" : `page-${idx + 1}`)
+  return {
+    id,
+    kind:        raw.kind || "landing",
+    title:       raw.title || "",
+    description: raw.description || "",
+    slug:        raw.slug || (id === "home" ? "/" : `/${id}`),
+    nav:         raw.nav || {},
+    sections:    (raw.sections || []).map(parseSection),
+  }
+}
+
+// ── Sections ──────────────────────────────────────────────────────────────────
+
+function parseSection(raw) {
+  const type = raw.type || "custom"
+
+  return {
+    id:       raw.id       || sectionId(type),
+    type,
+    enabled:  raw.enabled  !== undefined ? raw.enabled : true,
+    areas:    raw.areas    || DEFAULT_AREAS[type] || { content: 1 },
+    pattern:  raw.pattern  || undefined,       // undefined = Pattern Selector entscheidet
+    data:     mergeData(DEFAULT_DATA[type] || {}, raw.data || {}),
+    items:    (raw.items || []).map(parseItem),
+    settings: mergeSettings(DEFAULT_SETTINGS[type] || {}, raw.settings || {}),
+  }
+}
+
+function mergeData(defaults, overrides) {
+  return { ...defaults, ...overrides }
+}
+
+function mergeSettings(defaults, overrides) {
+  return { ...defaults, ...overrides }
+}
+
+function parseItem(raw) {
+  // Items sind intentionell flexibel — nur id wird garantiert
+  return {
+    id: raw.id || sectionId("item"),
+    ...raw,
+  }
+}
+
+// ── SEO ───────────────────────────────────────────────────────────────────────
+
+function parseSeo(raw, site) {
+  const name = site.name || ""
+  return {
+    titleTemplate:      raw.titleTemplate      || `%s | ${name}`,
+    defaultDescription: raw.defaultDescription || site.tagline || "",
+    ogImage:            raw.ogImage            || "",
+    canonical:          raw.canonical          || (site.domain ? `https://${site.domain}` : ""),
+    locale:             raw.locale             || "de_CH",
+    robots:             raw.robots             || "index, follow",
+  }
+}
+
+// ── Legal ─────────────────────────────────────────────────────────────────────
+
+function parseLegal(raw, site) {
+  return {
+    cookieBanner:    raw.cookieBanner   || false,
+    imprintUrl:      raw.imprintUrl     || "",
+    privacyUrl:      raw.privacyUrl     || "",
+    agbUrl:          raw.agbUrl         || "",
+    companyName:     raw.companyName    || site.name || "",
+    companyAddress:  raw.companyAddress || [site.contact?.address, site.contact?.city].filter(Boolean).join(", "),
+    vatId:           raw.vatId          || "",
+  }
+}
+
+/**
+ * engine/pageComposer.js
+ *
+ * Bestimmt welche Section-Typen eine Seite enthält.
+ * Basiert auf pageType × industry × complexity.
+ *
+ * Gibt eine geordnete Liste von Section-Typ-Strings zurück —
+ * der Section Composer baut daraus konkrete Section-Objekte.
+ */
+
+// ── Page Type Basis-Mengen ────────────────────────────────────────────────────
+
+const PAGE_TYPES = {
+  landing:   ["hero", "services", "cta", "footer"],
+  sales:     ["hero", "benefits", "testimonials", "faq", "cta", "footer"],
+  company:   ["hero", "services", "team", "contact", "footer"],
+  portfolio: ["hero", "gallery", "testimonials", "contact", "footer"],
+  onepage:   ["hero", "services", "process", "testimonials", "cta", "footer"],
+}
+
+// ── Industry Extensions ───────────────────────────────────────────────────────
+
+const INDUSTRY_EXTENSIONS = {
+  treuhand:    ["trust", "process", "faq"],
+  kanzlei:     ["authority", "faq"],
+  it:          ["benefits", "testimonials"],
+  saas:        ["authority", "pricing", "faq"],
+  restaurant:  ["gallery", "testimonials"],
+  handwerk:    ["trust", "process", "gallery"],
+  immobilien:  ["gallery", "testimonials"],
+  medizin:     ["trust", "team", "faq"],
+  coaching:    ["authority", "process", "testimonials"],
+  bildung:     ["process", "team", "faq"],
+  generic:     [],
+}
+
+// ── Complexity Map (Fibonacci) ────────────────────────────────────────────────
+
+const COMPLEXITY = {
+  1: ["hero", "cta", "footer"],
+  3: ["hero", "services", "cta", "footer"],
+  5: ["hero", "trust", "services", "testimonials", "cta", "footer"],
+  8: ["hero", "trust", "authority", "services", "process", "testimonials", "faq", "cta", "footer"],
+}
+
+// ── Reihenfolge ───────────────────────────────────────────────────────────────
+
+// Kanonische Reihenfolge aller Section-Typen.
+// Wird genutzt um die gemergte Menge zu sortieren.
+const CANONICAL_ORDER = [
+  "header",
+  "hero",
+  "trust",
+  "authority",
+  "services",
+  "benefits",
+  "process",
+  "team",
+  "gallery",
+  "testimonials",
+  "pricing",   // nach testimonials, vor faq — korrekte Sales-Reihenfolge
+  "faq",
+  "contact",
+  "cta",
+  "footer",
+]
+
+// ── Composer ──────────────────────────────────────────────────────────────────
+
+/**
+ * Gibt eine geordnete Liste von Section-Typ-Strings zurück.
+ *
+ * @param {object} site - site-Objekt aus der DSL (nach dem Parser)
+ * @returns {string[]}  - z.B. ["hero", "trust", "services", "faq", "cta", "footer"]
+ */
+export function composePage(site) {
+  const base       = COMPLEXITY[site.complexity] || COMPLEXITY[5]
+  const extensions = INDUSTRY_EXTENSIONS[site.industry] || []
+
+  // Merged Set: alle Typen aus Complexity + Industry Extensions
+  const merged = new Set(base)
+  extensions.forEach(s => merged.add(s))
+
+  // Sortieren nach kanonischer Reihenfolge
+  const sorted = CANONICAL_ORDER.filter(type => merged.has(type))
+
+  // Graph-Validierung (Warnungen, keine Fehler — Reihenfolge ist bereits kanonisch)
+  const violations = validateSequence(sorted)
+  if (violations.length > 0) {
+    console.warn("pageComposer: Graph-Verstösse in generierter Reihenfolge:", violations)
+  }
+
+  return sorted
+}
+
+/**
+ * Gibt die Basis-Sections für einen pageType zurück (ohne industry/complexity).
+ * Nützlich für Tests und Previews.
+ */
+export function basePageSections(pageType) {
+  return PAGE_TYPES[pageType] || PAGE_TYPES.landing
+}
+
+/**
+ * Gibt die Industry-Extensions für eine Branche zurück.
+ */
+export function industryExtensions(industry) {
+  return INDUSTRY_EXTENSIONS[industry] || []
+}
+
+/**
+ * engine/sectionComposer.js
+ *
+ * Erzeugt aus einer Liste von Section-Typ-Strings vollständige Section-Objekte.
+ * Jede Section bekommt ID, areas, data, items und settings aus den Defaults.
+ */
+
+/**
+ * Erzeugt Section-Objekte aus einer Liste von Typ-Strings.
+ *
+ * @param {string[]} sectionTypes - z.B. ["hero", "trust", "services", "cta", "footer"]
+ * @returns {object[]}            - Vollständige Section-Objekte
+ */
+export function composeSections(sectionTypes) {
+  return sectionTypes.map(type => ({
+    id:       sectionId(type),
+    type,
+    enabled:  true,
+    areas:    { ...(DEFAULT_AREAS[type]    || { content: 1 }) },
+    pattern:  undefined,
+    data:     { ...(DEFAULT_DATA[type]     || {}) },
+    items:    [],
+    settings: { ...(DEFAULT_SETTINGS[type] || { background: "default", paddingTop: "lg", paddingBottom: "lg" }) },
+  }))
+}
+
+/**
+ * Erzeugt eine einzelne Section für einen Typ.
+ * Nützlich wenn der Page Composer eine neue Section zu einer bestehenden Page hinzufügt.
+ */
+export function composeSection(type) {
+  return composeSections([type])[0]
+}
+
+/**
+ * engine/patternSelector.js
+ *
+ * Wählt das UI-Pattern für eine Section.
+ * Reihenfolge: expliziter Override → fester Typ → Item-Anzahl-Regel.
+ */
+
+// Section-Typen mit festem Pattern (unabhängig von Item-Anzahl)
+const FIXED_PATTERNS = {
+  header:       "header",
+  hero:         "hero",
+  trust:        "trust",
+  authority:    "text",
+  process:      "process",
+  faq:          "faq",
+  cta:          "cta",
+  footer:       "footer",
+  contact:      "contact",
+  gallery:      "gallery",
+  testimonials: "testimonials",
+}
+
+// Section-Typen die item-basiert ihr Pattern wählen
+// (kein Eintrag in FIXED_PATTERNS → fällt durch zur Item-Anzahl-Regel)
+// services, benefits, pricing, team, custom → je nach items: text | cards | grid | list
+
+/**
+ * Gibt das Pattern für eine Section zurück.
+ *
+ * @param {object} section - Section-Objekt (muss type und optional items haben)
+ * @returns {string}       - Pattern-Bezeichner
+ */
+export function selectPattern(section) {
+  // 1. Expliziter Override in der DSL
+  if (section.pattern) return section.pattern
+
+  // 2. Fester Typ
+  if (FIXED_PATTERNS[section.type]) return FIXED_PATTERNS[section.type]
+
+  // 3. Item-Anzahl-Regel
+  const count = section.items?.length || 0
+
+  // BUG-8 Fix: Sections wie services/benefits/pricing/team erwarten eine Card-Struktur
+  // auch wenn noch keine Items befüllt sind (Skeleton-Rendering). 'text' wäre irreführend.
+  const isItemSection = ["services", "benefits", "pricing", "team"].includes(section.type)
+  if (count === 0) return isItemSection ? "cards" : "text"
+  if (count === 2) return "split"
+  if (count <= 4) return "cards"
+  if (count <= 8) return "grid"
+  return "list"
+}
+
+/**
+ * engine/layoutComposer.js
+ *
+ * Erzeugt aus den Fibonacci-areas einer Section ein Layout-Objekt.
+ * Das Layout-Objekt wird von den Pattern-Renderern in CSS umgewandelt.
+ */
+
+// Anzahl Spalten → Layout-Typ
+const LAYOUT_TYPES = {
+  1: "stack",
+  2: "split",
+  3: "triple",
+}
+
+/**
+ * Erzeugt ein Layout-Objekt aus den areas einer Section.
+ *
+ * @param {object} section - Section mit areas-Objekt
+ * @returns {object}       - Layout-Beschreibung
+ */
+export function composeLayout(section) {
+  const areas   = section.areas || { content: 1 }
+  const keys    = Object.keys(areas)
+  const values  = Object.values(areas)
+  const columns = values.map(v => `${v}fr`).join(" ")
+  const count   = keys.length
+
+  return {
+    display:    "grid",
+    columns,
+    type:       LAYOUT_TYPES[count] || "grid",
+    areaNames:  keys,
+    areaValues: values,
+    // Inline-Style-String für direkte Nutzung im HTML
+    style:      `display:grid;grid-template-columns:${columns};gap:var(--sp-8)`,
+  }
+}
+
+/**
+ * Gibt einen responsiven Wrapper-Style zurück.
+ * Auf Mobile kollabiert jedes Grid zu einer Spalte.
+ *
+ * @param {object} layout - Ergebnis von composeLayout()
+ * @returns {string}      - CSS-Klassen-String
+ */
+export function layoutClass(layout) {
+  const map = {
+    stack:  "layout-stack",
+    split:  "layout-split",
+    triple: "layout-triple",
+    grid:   "layout-grid",
+  }
+  return map[layout.type] || "layout-grid"
+}
+
+/**
+ * patterns/trust.js — KPI-Zahlen / Kennzahlen-Leiste
+ */
+
+export function renderTrust(section, layout) {
+  const d     = section.data  || {}
+  const items = section.items || []
+  const bg    = esc(section.settings?.background || "alt")
+  const align = esc(section.settings?.textAlign  || "center")
+  const pt    = esc(section.settings?.paddingTop    || "md")
+  const pb    = esc(section.settings?.paddingBottom || "md")
+
+  return `<section class="section section--trust bg--${bg} section--pt-${pt} section--pb-${pb}" id="${esc(section.id)}">
+  <div class="container">
+    ${d.title ? `<p class="section__label text--${align}">${esc(d.title)}</p>` : ""}
+    ${items.length > 0 ? `<div class="trust-grid">
+      ${items.map(item => `
+      <div class="trust-item">
+        <span class="trust-item__stat">${esc(item.stat)}</span>
+        <span class="trust-item__label">${esc(item.statLabel || item.label)}</span>
+      </div>`).join("")}
+    </div>` : ""}
+  </div>
+</section>`
+}
+
+/**
+ * patterns/process.js — Nummerierte Schritte
+ */
+
+export function renderProcess(section, layout) {
+  const d     = section.data  || {}
+  const items = section.items || []
+  const bg    = esc(section.settings?.background || "default")
+  const pt    = esc(section.settings?.paddingTop    || "lg")
+  const pb    = esc(section.settings?.paddingBottom || "lg")
+
+  return `<section class="section section--process bg--${bg} section--pt-${pt} section--pb-${pb}" id="${esc(section.id)}">
+  <div class="container">
+    ${d.label ? `<p class="eyebrow">${esc(d.label)}</p>`          : ""}
+    ${d.title ? `<h2 class="section__title">${esc(d.title)}</h2>` : ""}
+    ${items.length > 0 ? `<ol class="process-steps">
+      ${items.map((item, idx) => `
+      <li class="process-step">
+        <span class="process-step__number">${esc(item.step ?? idx + 1)}</span>
+        <div class="process-step__content">
+          ${item.title ? `<h3 class="process-step__title">${esc(item.title)}</h3>` : ""}
+          ${item.body  ? `<p class="process-step__body">${esc(item.body)}</p>`     : ""}
+        </div>
+      </li>`).join("")}
+    </ol>` : ""}
+  </div>
+</section>`
+}
+
+/**
+ * patterns/testimonials.js
+ */
+
+function stars(rating) {
+  const n = Math.min(Math.max(Number(rating) || 5, 1), 5)
+  return "★".repeat(n) + "☆".repeat(5 - n)
+}
+
+export function renderTestimonials(section, layout) {
+  const d     = section.data  || {}
+  const items = section.items || []
+  const bg    = esc(section.settings?.background || "alt")
+  const pt    = esc(section.settings?.paddingTop    || "lg")
+  const pb    = esc(section.settings?.paddingBottom || "lg")
+
+  // BUG-5 Fix: mindestens 1 Spalte, auch bei 0 items
+  const cols  = items.length === 0 ? 3 : Math.min(items.length, 3)
+
+  return `<section class="section section--testimonials bg--${bg} section--pt-${pt} section--pb-${pb}" id="${esc(section.id)}">
+  <div class="container">
+    ${d.label ? `<p class="eyebrow">${esc(d.label)}</p>`              : ""}
+    ${d.title ? `<h2 class="section__title">${esc(d.title)}</h2>`     : ""}
+    ${items.length > 0 ? `<div class="card-grid card-grid--${cols}">
+      ${items.map(item => `
+      <figure class="testimonial">
+        ${item.rating ? `<p class="testimonial__stars" aria-label="${esc(item.rating)} von 5 Sternen">${stars(item.rating)}</p>` : ""}
+        <blockquote class="testimonial__body">${esc(item.body)}</blockquote>
+        <figcaption class="testimonial__author">
+          <strong>${esc(item.name)}</strong>
+          ${(item.role || item.company) ? `<span>${esc([item.role, item.company].filter(Boolean).join(", "))}</span>` : ""}
+        </figcaption>
+      </figure>`).join("")}
+    </div>` : ""}
+  </div>
+</section>`
+}
+
+/**
+ * patterns/faq.js
+ */
+
+export function renderFaq(section, layout) {
+  const d     = section.data  || {}
+  const items = section.items || []
+  const bg    = esc(section.settings?.background || "default")
+  const pt    = esc(section.settings?.paddingTop    || "lg")
+  const pb    = esc(section.settings?.paddingBottom || "lg")
+
+  // BUG-10 Fix: 'i' entfernt — nicht verwendet
+  return `<section class="section section--faq bg--${bg} section--pt-${pt} section--pb-${pb}" id="${esc(section.id)}">
+  <div class="container container--sm">
+    ${d.label ? `<p class="eyebrow">${esc(d.label)}</p>`          : ""}
+    ${d.title ? `<h2 class="section__title">${esc(d.title)}</h2>` : ""}
+    ${items.length > 0 ? `<dl class="faq">
+      ${items.map(item => `
+      <div class="faq__item">
+        <dt class="faq__question">${esc(item.question || item.title)}</dt>
+        <dd class="faq__answer">${esc(item.answer   || item.body)}</dd>
+      </div>`).join("")}
+    </dl>` : ""}
+  </div>
+</section>`
+}
+
+/**
+ * patterns/cta.js
+ */
+
+export function renderCta(section, layout) {
+  const d     = section.data || {}
+  const bg    = esc(section.settings?.background || "brand")
+  const align = esc(section.settings?.textAlign  || "center")
+  const pt    = esc(section.settings?.paddingTop    || "xl")
+  const pb    = esc(section.settings?.paddingBottom || "xl")
+
+  return `<section class="section section--cta bg--${bg} section--pt-${pt} section--pb-${pb} text--${align}" id="${esc(section.id)}">
+  <div class="container container--sm">
+    ${d.label    ? `<p class="eyebrow eyebrow--light">${esc(d.label)}</p>`       : ""}
+    ${d.title    ? `<h2 class="section__title">${esc(d.title)}</h2>`             : ""}
+    ${d.subtitle ? `<p class="section__subtitle">${esc(d.subtitle)}</p>`         : ""}
+    ${(d.ctaPrimary || d.ctaSecondary) ? `
+    <div class="btn-group btn-group--center">
+      ${d.ctaPrimary   ? `<a href="${escUrl(d.ctaPrimaryUrl)}"   class="btn btn--primary">${esc(d.ctaPrimary)}</a>`                         : ""}
+      ${d.ctaSecondary ? `<a href="${escUrl(d.ctaSecondaryUrl)}" class="btn btn--secondary btn--inverted">${esc(d.ctaSecondary)}</a>` : ""}
+    </div>` : ""}
+  </div>
+</section>`
+}
+
+/**
+ * patterns/footer.js
+ */
+
+export function renderFooter(section, layout, config) {
+  const d     = section.data || {}
+  const legal = config?.legal || {}
+  const site  = config?.site  || {}
+  const year  = new Date().getFullYear()
+  const pt    = esc(section.settings?.paddingTop    || "lg")
+  const pb    = esc(section.settings?.paddingBottom || "lg")
+
+  const name    = d.title || site.name || ""
+  const address = legal.companyAddress
+    || [site.contact?.address, site.contact?.city].filter(Boolean).join(", ")
+
+  return `<footer class="section section--footer bg--dark section--pt-${pt} section--pb-${pb}" id="${esc(section.id)}">
+  <div class="container">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <p class="footer__name">${esc(name)}</p>
+        ${address          ? `<p class="footer__address">${esc(address)}</p>` : ""}
+        ${site.contact?.phone ? `<p class="footer__phone"><a href="tel:${escUrl(site.contact.phone)}">${esc(site.contact.phone)}</a></p>` : ""}
+        ${site.contact?.email ? `<p class="footer__email"><a href="mailto:${escUrl(site.contact.email)}">${esc(site.contact.email)}</a></p>` : ""}
+      </div>
+      <nav class="footer__legal" aria-label="Rechtliches">
+        ${legal.imprintUrl ? `<a href="${escUrl(legal.imprintUrl)}">Impressum</a>`   : ""}
+        ${legal.privacyUrl ? `<a href="${escUrl(legal.privacyUrl)}">Datenschutz</a>` : ""}
+        ${legal.agbUrl     ? `<a href="${escUrl(legal.agbUrl)}">AGB</a>`             : ""}
+      </nav>
+    </div>
+    <p class="footer__copy">© ${year} ${esc(name)}</p>
+  </div>
+</footer>`
+}
+
+/**
+ * patterns/hero.js
+ */
+
+export function renderHero(section, layout) {
+  const d       = section.data || {}
+  const hasCols = layout.areaNames.length > 1
+  const ptClass = `section--pt-${esc(section.settings?.paddingTop  || "xl")}`
+  const pbClass = `section--pb-${esc(section.settings?.paddingBottom || "xl")}`
+
+  return `<section class="section section--hero ${ptClass} ${pbClass}" id="${esc(section.id)}">
+  <div class="container">
+    <div class="${hasCols ? "layout-split" : "layout-stack"}"${hasCols ? ` style="${esc(layout.style)}"` : ""}>
+      <div class="hero__content">
+        ${d.label    ? `<p class="eyebrow">${esc(d.label)}</p>` : ""}
+        <h1 class="hero__title">${esc(d.title)}</h1>
+        ${d.subtitle ? `<p class="hero__subtitle">${esc(d.subtitle)}</p>` : ""}
+        ${(d.ctaPrimary || d.ctaSecondary) ? `
+        <div class="btn-group">
+          ${d.ctaPrimary   ? `<a href="${escUrl(d.ctaPrimaryUrl)}"   class="btn btn--primary">${esc(d.ctaPrimary)}</a>`   : ""}
+          ${d.ctaSecondary ? `<a href="${escUrl(d.ctaSecondaryUrl)}" class="btn btn--secondary">${esc(d.ctaSecondary)}</a>` : ""}
+        </div>` : ""}
+      </div>
+      ${hasCols && d.image ? `<div class="hero__image"><img src="${escUrl(d.image)}" alt="${esc(d.imageAlt || d.title)}" loading="eager"></div>` : ""}
+    </div>
+  </div>
+</section>`
+}
+
+/**
+ * patterns/text.js
+ */
+
+export function renderText(section, layout) {
+  const d  = section.data || {}
+  const bg = esc(section.settings?.background || "default")
+  const pt = esc(section.settings?.paddingTop    || "lg")
+  const pb = esc(section.settings?.paddingBottom || "lg")
+
+  return `<section class="section section--text bg--${bg} section--pt-${pt} section--pb-${pb}" id="${esc(section.id)}">
+  <div class="container">
+    ${d.label    ? `<p class="eyebrow">${esc(d.label)}</p>`                     : ""}
+    ${d.title    ? `<h2 class="section__title">${esc(d.title)}</h2>`            : ""}
+    ${d.subtitle ? `<p class="section__subtitle">${esc(d.subtitle)}</p>`        : ""}
+    ${d.body     ? `<div class="prose">${esc(d.body)}</div>`                    : ""}
+  </div>
+</section>`
+}
+
+/**
+ * patterns/cards.js — 2–4 Items als Karten
+ */
+
+export function renderCards(section, layout) {
+  const d     = section.data  || {}
+  const items = section.items || []
+  const bg    = esc(section.settings?.background || "default")
+  const pt    = esc(section.settings?.paddingTop    || "lg")
+  const pb    = esc(section.settings?.paddingBottom || "lg")
+
+  // BUG-4 Fix: mindestens 1 Spalte, auch bei 0 items
+  const cols  = items.length === 0 ? 3 : items.length === 2 ? 2 : Math.min(items.length, 3)
+
+  return `<section class="section section--cards bg--${bg} section--pt-${pt} section--pb-${pb}" id="${esc(section.id)}">
+  <div class="container">
+    ${d.label    ? `<p class="eyebrow">${esc(d.label)}</p>`              : ""}
+    ${d.title    ? `<h2 class="section__title">${esc(d.title)}</h2>`     : ""}
+    ${d.subtitle ? `<p class="section__subtitle">${esc(d.subtitle)}</p>` : ""}
+    ${items.length > 0 ? `<div class="card-grid card-grid--${cols}">
+      ${items.map(item => `
+      <div class="card">
+        ${item.icon  ? `<div class="card__icon">${esc(item.icon)}</div>` : ""}
+        ${item.image ? `<img class="card__image" src="${escUrl(item.image)}" alt="${esc(item.imageAlt || item.title)}">` : ""}
+        ${item.title ? `<h3 class="card__title">${esc(item.title)}</h3>` : ""}
+        ${item.body  ? `<p class="card__body">${esc(item.body)}</p>`     : ""}
+        ${item.url   ? `<a href="${escUrl(item.url)}" class="card__link">${esc(item.label || "Mehr erfahren")}</a>` : ""}
+      </div>`).join("")}
+    </div>` : ""}
+  </div>
+</section>`
+}
+
+/**
+ * engine/validator.js
+ *
+ * Semantischer Validator — prüft die DSL nach dem Parser.
+ * Ergänzt den Schema-Validator (schema/validate.js) um Laufzeit-Checks:
+ * - Sind Section-IDs innerhalb einer Page eindeutig?
+ * - Sind Page-IDs eindeutig?
+ * - Ist die Section-Reihenfolge graph-konform?
+ * - Gibt es leere required-Felder in kritischen Sections?
+ */
+
+const VALID_SECTION_TYPES = new Set([
+  "header", "hero", "trust", "authority", "services", "benefits",
+  "process", "team", "gallery", "testimonials", "faq", "cta",
+  "footer", "contact", "pricing", "custom",
+])
+
+/**
+ * Validiert eine vollständige DSL (nach parse()).
+ * Gibt { valid: boolean, errors: string[], warnings: string[] } zurück.
+ *
+ * @param {object} dsl - Geparste DSL
+ */
+export function validateDSL(dsl) {
+  const errors   = []
+  const warnings = []
+
+  // ── Top-Level ───────────────────────────────────────────────────────────────
+  if (!dsl.site)  errors.push("site fehlt")
+  if (!dsl.theme) errors.push("theme fehlt")
+  if (!dsl.pages || dsl.pages.length === 0) errors.push("pages ist leer")
+
+  if (errors.length > 0) return { valid: false, errors, warnings }
+
+  // ── Site ────────────────────────────────────────────────────────────────────
+  if (!dsl.site.name)     errors.push("site.name fehlt")
+  if (!dsl.site.industry) errors.push("site.industry fehlt")
+
+  // ── Pages ───────────────────────────────────────────────────────────────────
+  const pageIds = new Set()
+  for (const page of dsl.pages) {
+    if (!page.id) {
+      errors.push("Page ohne id")
+      continue
+    }
+    if (pageIds.has(page.id)) {
+      errors.push(`Doppelte Page-ID: '${page.id}'`)
+    }
+    pageIds.add(page.id)
+
+    // ── Sections ──────────────────────────────────────────────────────────────
+    const sectionIds = new Set()
+    const enabledTypes = []
+
+    for (const section of page.sections || []) {
+      // ID-Eindeutigkeit
+      if (!section.id) {
+        errors.push(`Page '${page.id}': Section ohne id`)
+        continue
+      }
+      if (sectionIds.has(section.id)) {
+        errors.push(`Page '${page.id}': Doppelte Section-ID '${section.id}'`)
+      }
+      sectionIds.add(section.id)
+
+      // Typ
+      if (!VALID_SECTION_TYPES.has(section.type)) {
+        errors.push(`Page '${page.id}', Section '${section.id}': Unbekannter Typ '${section.type}'`)
+      }
+
+      // Nur enabled Sections in die Graph-Prüfung
+      if (section.enabled !== false) {
+        enabledTypes.push(section.type)
+      }
+
+      // Hero braucht mindestens einen Titel
+      if (section.type === "hero" && !section.data?.title) {
+        warnings.push(`Section '${section.id}': hero.data.title ist leer`)
+      }
+
+      // CTA braucht ctaPrimary
+      if (section.type === "cta" && !section.data?.ctaPrimary) {
+        warnings.push(`Section '${section.id}': cta.data.ctaPrimary ist leer`)
+      }
+    }
+
+    // Graph-Reihenfolge prüfen (nur Warnungen, kein harter Fehler)
+    const violations = validateSequence(enabledTypes)
+    for (const v of violations) {
+      warnings.push(`Page '${page.id}': ${v}`)
+    }
+  }
+
+  return {
+    valid:    errors.length === 0,
+    errors,
+    warnings,
+  }
+}
+
+/**
+ * engine/renderer.js
+ *
+ * Verbindet Pattern Selector, Layout Composer und Pattern-Renderer.
+ * Gibt für eine Section den fertigen HTML-String zurück.
+ */
+
+// Pattern → Render-Funktion
+const RENDER_MAP = {
+  hero:         renderHero,
+  text:         renderText,
+  cards:        renderCards,
+  faq:          renderFaq,
+  cta:          renderCta,
+  trust:        renderTrust,
+  process:      renderProcess,
+  testimonials: renderTestimonials,
+  footer:       renderFooter,
+  // Aliase
+  split:        renderCards,
+  grid:         renderCards,
+  list:         renderText,
+  gallery:      renderCards,
+  contact:      renderText,
+  header:       renderText,
+}
+
+/**
+ * Rendert eine einzelne Section zu HTML.
+ *
+ * @param {object} section - Section-Objekt
+ * @param {object} config  - Vollständige DSL (für footer: legal, site)
+ * @returns {string}       - HTML-String
+ */
+export function renderSection(section, config = {}) {
+  if (section.enabled === false) return ""
+
+  const pattern = selectPattern(section)
+  const layout  = composeLayout(section)
+  const fn      = RENDER_MAP[pattern]
+
+  if (!fn) {
+    console.warn(`renderer: Kein Renderer für Pattern '${pattern}' (Section '${section.id}')`)
+    return `<!-- section ${section.id} (${section.type}): kein Renderer -->`
+  }
+
+  return fn(section, layout, config)
+}
+
+/**
+ * design/themeCompiler.js
+ *
+ * Erzeugt aus einem Theme-Objekt (nach parse()) einen vollständigen CSS-Block.
+ * Unterstützt beide Systeme: fresh tokens (swiss/editorial/glass/signature)
+ * und clear4-* Presets.
+ */
+
+// ── Preset Token-Tabellen ─────────────────────────────────────────────────────
+
+const PRESETS = {
+  swiss: {
+    primary:     "#1a365d",
+    accent:      "#38a169",
+    bg:          "#ffffff",
+    bgAlt:       "#f7f8fa",
+    surface:     "#ffffff",
+    text:        "#0a0a0a",
+    textLight:   "#3f3f46",
+    textMuted:   "#71717a",
+    border:      "#e4e4e7",
+    fontDisplay: "Instrument Sans, system-ui, sans-serif",
+    fontBody:    "Instrument Sans, system-ui, sans-serif",
+  },
+  editorial: {
+    primary:     "#111827",
+    accent:      "#b45309",
+    bg:          "#fafaf9",
+    bgAlt:       "#f0ede8",
+    surface:     "#ffffff",
+    text:        "#111827",
+    textLight:   "#374151",
+    textMuted:   "#9ca3af",
+    border:      "#d1d5db",
+    fontDisplay: "Playfair Display, Georgia, serif",
+    fontBody:    "Inter, system-ui, sans-serif",
+  },
+  glass: {
+    primary:     "#6366f1",
+    accent:      "#8b5cf6",
+    bg:          "#0f0f23",
+    bgAlt:       "#1a1a3e",
+    surface:     "rgba(255,255,255,0.06)",
+    text:        "#f8fafc",
+    textLight:   "#cbd5e1",
+    textMuted:   "#64748b",
+    border:      "rgba(255,255,255,0.12)",
+    fontDisplay: "Inter, system-ui, sans-serif",
+    fontBody:    "Inter, system-ui, sans-serif",
+  },
+  signature: {
+    primary:     "#0f766e",
+    accent:      "#c9a227",
+    bg:          "#f5f5f4",
+    bgAlt:       "#ececea",
+    surface:     "#ffffff",
+    text:        "#1f2937",
+    textLight:   "#4b5563",
+    textMuted:   "#9ca3af",
+    border:      "#e0e0de",
+    fontDisplay: "Inter, system-ui, sans-serif",
+    fontBody:    "Inter, system-ui, sans-serif",
+  },
+  "clear4-default": {
+    primary:     "#0f766e",
+    accent:      "#c9a227",
+    bg:          "#f5f5f4",
+    bgAlt:       "#ececea",
+    surface:     "#ffffff",
+    text:        "#1f2937",
+    textLight:   "#4b5563",
+    textMuted:   "#9ca3af",
+    border:      "#e0e0de",
+    fontDisplay: "Inter, system-ui, sans-serif",
+    fontBody:    "Inter, system-ui, sans-serif",
+  },
+  "clear4-handwerk": {
+    primary:     "#b47836",
+    accent:      "#e0b37b",
+    bg:          "#f5eee3",
+    bgAlt:       "#ede4d4",
+    surface:     "#ffffff",
+    text:        "#2c2419",
+    textLight:   "rgba(44,36,25,0.85)",
+    textMuted:   "rgba(44,36,25,0.66)",
+    border:      "rgba(56,44,30,0.18)",
+    fontDisplay: "Inter, system-ui, sans-serif",
+    fontBody:    "Inter, system-ui, sans-serif",
+  },
+  "clear4-landwirtschaft": {
+    primary:     "#799b3b",
+    accent:      "#c59d4e",
+    bg:          "#f4f3ea",
+    bgAlt:       "#eae9dc",
+    surface:     "#ffffff",
+    text:        "#253421",
+    textLight:   "rgba(37,52,33,0.88)",
+    textMuted:   "rgba(37,52,33,0.55)",
+    border:      "rgba(51,63,39,0.18)",
+    fontDisplay: "Inter, system-ui, sans-serif",
+    fontBody:    "Inter, system-ui, sans-serif",
+  },
+  "clear4-premium": {
+    primary:     "#0f766e",
+    accent:      "#c9a227",
+    bg:          "#fbfbfc",
+    bgAlt:       "#f0f0f2",
+    surface:     "#ffffff",
+    text:        "#0b1220",
+    textLight:   "rgba(11,18,32,0.78)",
+    textMuted:   "rgba(11,18,32,0.50)",
+    border:      "rgba(2,6,23,0.10)",
+    fontDisplay: "Inter, system-ui, sans-serif",
+    fontBody:    "Inter, system-ui, sans-serif",
+  },
+  "clear4-dark": {
+    primary:     "#5eead4",
+    accent:      "#fbbf24",
+    bg:          "#0f0f0f",
+    bgAlt:       "#1a1a1a",
+    surface:     "#1f1f1f",
+    text:        "#f5f5f5",
+    textLight:   "rgba(245,245,245,0.80)",
+    textMuted:   "rgba(245,245,245,0.55)",
+    border:      "rgba(255,255,255,0.10)",
+    fontDisplay: "Inter, system-ui, sans-serif",
+    fontBody:    "Inter, system-ui, sans-serif",
+  },
+}
+
+// ── Density → Spacing Multiplikator ──────────────────────────────────────────
+
+const DENSITY_SCALE = { compact: 0.8, balanced: 1.0, airy: 1.2 }
+
+// ── Radius-Map ────────────────────────────────────────────────────────────────
+
+const RADIUS_MAP = {
+  none:    { sm: "0",    md: "0",    lg: "0",    pill: "0"     },
+  subtle:  { sm: "2px",  md: "4px",  lg: "6px",  pill: "999px" },
+  default: { sm: "4px",  md: "8px",  lg: "12px", pill: "999px" },
+  round:   { sm: "8px",  md: "16px", lg: "24px", pill: "999px" },
+  pill:    { sm: "999px",md: "999px",lg: "999px", pill: "999px" },
+}
+
+// ── Compiler ──────────────────────────────────────────────────────────────────
+
+/**
+ * Erzeugt einen vollständigen CSS-:root-Block aus dem Theme-Objekt.
+ *
+ * @param {object} theme - Theme nach parse()
+ * @returns {string}     - CSS-String
+ */
+export function compileTheme(theme) {
+  const base    = PRESETS[theme.preset] || PRESETS.swiss
+  const density = DENSITY_SCALE[theme.density] || 1.0
+  const scale   = (theme.spacingScale || 1.0) * density
+  const radii   = RADIUS_MAP[theme.radius || "default"]
+
+  // Brand-Overrides anwenden
+  const colors = {
+    primary:   theme.brand?.primary  || base.primary,
+    accent:    theme.brand?.accent   || base.accent,
+    bg:        theme.brand?.bg       || base.bg,
+    bgAlt:     base.bgAlt,
+    surface:   base.surface,
+    text:      theme.brand?.text     || base.text,
+    textLight: base.textLight,
+    textMuted: base.textMuted,
+    border:    base.border,
+  }
+
+  // Font-Overrides anwenden
+  const fonts = {
+    display: theme.font?.display ? `${theme.font.display}, system-ui, sans-serif` : base.fontDisplay,
+    body:    theme.font?.body    ? `${theme.font.body}, system-ui, sans-serif`    : base.fontBody,
+    mono:    theme.font?.mono    || "ui-monospace, SFMono-Regular, Menlo, monospace",
+  }
+
+  // Spacing-Skala (4px-Grid × scale)
+  const sp = (n) => `${Math.round(n * scale)}px`
+
+  return `:root {
+  /* Colors */
+  --c-primary:    ${colors.primary};
+  --c-accent:     ${colors.accent};
+  --c-bg:         ${colors.bg};
+  --c-bg-alt:     ${colors.bgAlt};
+  --c-surface:    ${colors.surface};
+  --c-text:       ${colors.text};
+  --c-text-light: ${colors.textLight};
+  --c-text-muted: ${colors.textMuted};
+  --c-border:     ${colors.border};
+
+  /* Typography */
+  --font-display: ${fonts.display};
+  --font-body:    ${fonts.body};
+  --font-mono:    ${fonts.mono};
+
+  --fs-xs:   11px;
+  --fs-sm:   13px;
+  --fs-base: 15px;
+  --fs-lg:   17px;
+  --fs-xl:   20px;
+  --fs-2xl:  24px;
+  --fs-3xl:  32px;
+  --fs-4xl:  40px;
+
+  --lh-tight:   1.2;
+  --lh-normal:  1.5;
+  --lh-relaxed: 1.7;
+
+  --tracking-tight:  -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.08em;
+
+  /* Spacing (4px-Grid × ${scale.toFixed(2)}) */
+  --sp-1:  ${sp(4)};
+  --sp-2:  ${sp(8)};
+  --sp-3:  ${sp(12)};
+  --sp-4:  ${sp(16)};
+  --sp-5:  ${sp(20)};
+  --sp-6:  ${sp(24)};
+  --sp-8:  ${sp(32)};
+  --sp-10: ${sp(40)};
+  --sp-12: ${sp(48)};
+  --sp-16: ${sp(64)};
+
+  /* Section Padding */
+  --pt-none: 0;
+  --pt-sm:   ${sp(24)};
+  --pt-md:   ${sp(40)};
+  --pt-lg:   ${sp(64)};
+  --pt-xl:   ${sp(96)};
+
+  /* Radius */
+  --r-sm:   ${radii.sm};
+  --r-md:   ${radii.md};
+  --r-lg:   ${radii.lg};
+  --r-pill: ${radii.pill};
+
+  /* Shadows */
+  --sh-soft:    0 4px 12px rgba(0,0,0,0.06);
+  --sh-medium:  0 8px 24px rgba(0,0,0,0.10);
+  --sh-deep:    0 18px 45px rgba(0,0,0,0.16);
+
+  /* Transitions */
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast:  150ms;
+  --duration-norm:  220ms;
+
+  /* Layout */
+  --page-max:  1120px;
+  --container: min(var(--page-max), 100% - var(--sp-8) * 2);
+}
+
+/* Background utilities */
+.bg--default     { background: var(--c-bg); }
+.bg--alt         { background: var(--c-bg-alt); }
+.bg--brand       { background: var(--c-primary); color: #fff; }
+.bg--dark        { background: #111; color: #f5f5f5; }
+.bg--transparent { background: transparent; }
+
+/* Section padding utilities */
+.section--pt-none { padding-top: var(--pt-none); }
+.section--pt-sm   { padding-top: var(--pt-sm);   }
+.section--pt-md   { padding-top: var(--pt-md);   }
+.section--pt-lg   { padding-top: var(--pt-lg);   }
+.section--pt-xl   { padding-top: var(--pt-xl);   }
+
+.section--pb-none { padding-bottom: var(--pt-none); }
+.section--pb-sm   { padding-bottom: var(--pt-sm);   }
+.section--pb-md   { padding-bottom: var(--pt-md);   }
+.section--pb-lg   { padding-bottom: var(--pt-lg);   }
+.section--pb-xl   { padding-bottom: var(--pt-xl);   }
+
+/* Text alignment */
+.text--left   { text-align: left;   }
+.text--center { text-align: center; }
+.text--right  { text-align: right;  }
+
+/* Layout */
+.container    { width: var(--container); margin-inline: auto; }
+.container--sm { max-width: 720px; margin-inline: auto; }
+
+.layout-stack  { display: flex; flex-direction: column; gap: var(--sp-6); }
+.layout-split  { display: grid; gap: var(--sp-8); }
+.layout-triple { display: grid; gap: var(--sp-6); }
+.layout-grid   { display: grid; gap: var(--sp-6); }
+
+@media (min-width: 768px) {
+  .layout-split  { grid-template-columns: 8fr 5fr; }
+  .layout-triple { grid-template-columns: repeat(3, 1fr); }
+  .layout-grid   { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+}
+
+/* Card Grid */
+.card-grid   { display: grid; gap: var(--sp-6); }
+.card-grid--2 { grid-template-columns: 1fr; }
+.card-grid--3 { grid-template-columns: 1fr; }
+
+@media (min-width: 640px)  { .card-grid--2 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 768px)  { .card-grid--3 { grid-template-columns: repeat(3, 1fr); } }
+
+/* Trust Grid */
+.trust-grid { display: flex; flex-wrap: wrap; gap: var(--sp-6); justify-content: center; }
+.trust-item { text-align: center; }
+.trust-item__stat  { display: block; font-size: var(--fs-3xl); font-weight: 700; color: var(--c-primary); letter-spacing: var(--tracking-tight); }
+.trust-item__label { display: block; font-size: var(--fs-sm); color: var(--c-text-muted); margin-top: var(--sp-1); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); padding: var(--sp-3) var(--sp-5); border-radius: var(--r-pill); font-family: var(--font-body); font-size: var(--fs-base); font-weight: 500; border: none; cursor: pointer; text-decoration: none; transition: all var(--duration-fast) var(--ease-out); }
+.btn--primary   { background: var(--c-primary); color: #fff; box-shadow: var(--sh-soft); }
+.btn--primary:hover   { transform: translateY(-1px); box-shadow: var(--sh-medium); }
+.btn--secondary { background: transparent; color: var(--c-text); border: 1px solid var(--c-border); }
+.btn--secondary:hover { background: rgba(0,0,0,.04); }
+.btn--inverted  { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.3); }
+.btn--inverted:hover  { background: rgba(255,255,255,.25); }
+.btn-group { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.btn-group--center { justify-content: center; }
+
+/* Eyebrow */
+.eyebrow { font-size: var(--fs-xs); font-weight: 600; letter-spacing: var(--tracking-wide); text-transform: uppercase; color: var(--c-primary); margin-bottom: var(--sp-2); }
+.eyebrow--light { color: rgba(255,255,255,.75); }
+
+/* Section titles */
+.section__title    { font-family: var(--font-display); font-size: var(--fs-3xl); font-weight: 700; letter-spacing: var(--tracking-tight); margin-bottom: var(--sp-3); }
+.section__subtitle { font-size: var(--fs-lg); color: var(--c-text-light); line-height: var(--lh-relaxed); margin-bottom: var(--sp-6); max-width: 640px; }
+.section__label    { font-size: var(--fs-sm); color: var(--c-text-muted); margin-bottom: var(--sp-3); }
+
+/* Hero */
+.hero__title    { font-family: var(--font-display); font-size: clamp(var(--fs-3xl), 5vw, var(--fs-4xl)); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: var(--lh-tight); margin-bottom: var(--sp-4); }
+.hero__subtitle { font-size: var(--fs-lg); color: var(--c-text-light); line-height: var(--lh-relaxed); margin-bottom: var(--sp-6); max-width: 560px; }
+
+/* Card */
+.card { background: var(--c-surface); border-radius: var(--r-lg); border: 1px solid var(--c-border); padding: var(--sp-5); box-shadow: var(--sh-soft); transition: all var(--duration-fast) var(--ease-out); }
+.card:hover { transform: translateY(-2px); box-shadow: var(--sh-medium); }
+.card__icon  { font-size: 2em; margin-bottom: var(--sp-3); }
+.card__title { font-size: var(--fs-lg); font-weight: 600; margin-bottom: var(--sp-2); }
+.card__body  { font-size: var(--fs-base); color: var(--c-text-light); line-height: var(--lh-relaxed); }
+.card__link  { display: inline-block; margin-top: var(--sp-3); font-size: var(--fs-sm); font-weight: 500; color: var(--c-primary); }
+
+/* Testimonial */
+.testimonial { background: var(--c-surface); border-radius: var(--r-lg); border: 1px solid var(--c-border); padding: var(--sp-5); }
+.testimonial__stars  { color: var(--c-accent); font-size: var(--fs-base); margin-bottom: var(--sp-3); }
+.testimonial__body   { font-size: var(--fs-base); color: var(--c-text-light); line-height: var(--lh-relaxed); margin-bottom: var(--sp-4); font-style: italic; }
+.testimonial__author strong { display: block; font-weight: 600; }
+.testimonial__author span   { font-size: var(--fs-sm); color: var(--c-text-muted); }
+
+/* FAQ */
+.faq { display: grid; gap: var(--sp-4); }
+.faq__item { border-bottom: 1px solid var(--c-border); padding-bottom: var(--sp-4); }
+.faq__question { font-weight: 600; font-size: var(--fs-lg); margin-bottom: var(--sp-2); }
+.faq__answer   { color: var(--c-text-light); line-height: var(--lh-relaxed); }
+
+/* Process */
+.process-steps { display: grid; gap: var(--sp-6); list-style: none; padding: 0; margin: 0; }
+.process-step  { display: grid; grid-template-columns: 2.5rem 1fr; gap: var(--sp-4); align-items: start; }
+.process-step__number { width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--c-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--fs-sm); flex-shrink: 0; }
+.process-step__title  { font-weight: 600; font-size: var(--fs-lg); margin-bottom: var(--sp-1); }
+.process-step__body   { color: var(--c-text-light); line-height: var(--lh-relaxed); }
+
+/* Footer */
+.footer__inner   { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-6); margin-bottom: var(--sp-6); }
+.footer__name    { font-weight: 700; font-size: var(--fs-lg); margin-bottom: var(--sp-2); }
+.footer__address,.footer__phone,.footer__email { font-size: var(--fs-sm); opacity: .75; }
+.footer__email a,.footer__phone a { color: inherit; text-decoration: none; }
+.footer__legal   { display: flex; flex-wrap: wrap; gap: var(--sp-4); align-items: flex-start; }
+.footer__legal a { font-size: var(--fs-sm); opacity: .75; text-decoration: none; }
+.footer__legal a:hover { opacity: 1; }
+.footer__copy    { font-size: var(--fs-xs); opacity: .5; border-top: 1px solid rgba(255,255,255,.1); padding-top: var(--sp-4); }
+
+/* Prose */
+.prose { line-height: var(--lh-relaxed); color: var(--c-text-light); max-width: 720px; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+`
+}
+
+/**
+ * engine/compiler.js
+ *
+ * Haupteinstieg der Factory.
+ * DSL → vollständiges HTML-Dokument.
+ *
+ * Ablauf:
+ *   1. parse()     → normierte DSL
+ *   2. validateDSL → Fehler/Warnungen
+ *   3. composePage → Section-Typen
+ *   4. sections übernehmen (aus DSL) oder composeSections (auto)
+ *   5. renderSection pro Section
+ *   6. compileTheme → CSS
+ *   7. HTML-Dokument zusammenbauen
+ */
+
+/**
+ * Kompiliert eine DSL (roh oder bereits geparst) zu einem HTML-String.
+ *
+ * @param {object}  input    - Rohe oder geparste DSL
+ * @param {object}  [opts]
+ * @param {boolean} [opts.strict=false] - Bei true: Fehler werfen statt Warning
+ * @returns {string}         - Vollständiges HTML-Dokument
+ */
+export function compileSite(input, opts = {}) {
+  // 1. Parse
+  const config = parse(input)
+
+  // 2. Validate
+  const { valid, errors, warnings } = validateDSL(config)
+
+  if (warnings.length > 0) {
+    warnings.forEach(w => console.warn("compiler warning:", w))
+  }
+  if (!valid) {
+    const msg = "compiler: DSL-Fehler:\n" + errors.map(e => `  • ${e}`).join("\n")
+    if (opts.strict) throw new Error(msg)
+    console.error(msg)
+  }
+
+  // 3. Seiten kompilieren (CSS wird intern in compilePage erzeugt)
+  const pages = config.pages.map(page => compilePage(page, config))
+
+  // Bei einer Seite direkt das HTML zurückgeben
+  if (pages.length === 1) return pages[0]
+
+  // Mehrere Seiten: Map { pageId → html }
+  return Object.fromEntries(config.pages.map((p, i) => [p.id, pages[i]]))
+}
+
+// ── Interne Helfer ────────────────────────────────────────────────────────────
+
+function compilePage(page, config) {
+  // Sections: aus DSL übernehmen oder auto-generieren
+  let sections = page.sections || []
+
+  if (sections.length === 0) {
+    const types = composePage(config.site)
+    sections = composeSections(types)
+  }
+
+  const body = sections
+    .map(section => renderSection(section, config))
+    .join("\n")
+
+  const meta = compileMeta(page, config)
+  const css  = compileTheme(config.theme)
+  const lang = config.site.language || "de"
+
+  return `<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+${meta}
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--c-bg); color: var(--c-text); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+${css}
+</style>
+</head>
+<body>
+${body}
+</body>
+</html>`
+}
+
+function compileMeta(page, config) {
+  const seo  = config.seo  || {}
+  const site = config.site || {}
+
+  const rawTitle = page.title
+    ? (seo.titleTemplate || "%s").replace("%s", page.title)
+    : site.name || ""
+  const title       = esc(rawTitle)
+  const description = esc(page.description || seo.defaultDescription || "")
+  const canonical   = seo.canonical
+    ? esc(`${seo.canonical}${page.slug === "/" ? "" : page.slug}`)
+    : ""
+  const ogLocale    = esc(seo.locale || "de_CH")
+  const robots      = esc(seo.robots || "index, follow")
+  const ogImage     = esc(seo.ogImage || "")
+
+  return [
+    `<title>${title}</title>`,
+    description ? `<meta name="description" content="${description}">` : "",
+    `<meta name="robots" content="${robots}">`,
+    canonical   ? `<link rel="canonical" href="${canonical}">` : "",
+    `<meta property="og:title" content="${title}">`,
+    description ? `<meta property="og:description" content="${description}">` : "",
+    ogImage     ? `<meta property="og:image" content="${ogImage}">` : "",
+    `<meta property="og:locale" content="${ogLocale}">`,
+  ].filter(Boolean).join("\n")
+}
+
+
+
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+const EXAMPLE_DSL = {
+  "version": "1.0",
+
+  "site": {
+    "name": "Muster Treuhand AG",
+    "language": "de-CH",
+    "industry": "treuhand",
+    "pageType": "landing",
+    "complexity": 5,
+    "domain": "muster-treuhand.ch",
+    "tagline": "Buchhaltung, Steuern und Beratung – aus einer Hand.",
+    "contact": {
+      "email": "info@muster-treuhand.ch",
+      "phone": "+41 31 000 00 00",
+      "city": "Bern",
+      "country": "CH"
+    }
+  },
+
+  "theme": {
+    "preset": "swiss",
+    "density": "airy",
+    "spacingScale": 1.1,
+    "brand": {
+      "primary": "#1a365d",
+      "accent":  "#38a169"
+    },
+    "font": {
+      "display": "Instrument Sans",
+      "body":    "Instrument Sans"
+    }
+  },
+
+  "pages": [
+    {
+      "id": "home",
+      "kind": "landing",
+      "title": "Professionelle Treuhanddienstleistungen in Bern",
+      "description": "Muster Treuhand AG – Ihr Partner für Buchhaltung, Steuerberatung und Unternehmensberatung in Bern.",
+      "slug": "/",
+      "sections": [
+        {
+          "id": "hero-a1b2",
+          "type": "hero",
+          "enabled": true,
+          "areas": { "content": 8, "image": 5 },
+          "data": {
+            "label":          "Treuhand in Bern",
+            "title":          "Ihr Partner für Treuhand & Finanzen",
+            "subtitle":       "Professionelle Buchhaltung, Steuern und Unternehmensberatung – damit Sie sich auf Ihr Kerngeschäft konzentrieren können.",
+            "ctaPrimary":     "Erstberatung anfragen",
+            "ctaPrimaryUrl":  "#kontakt",
+            "ctaSecondary":   "Leistungen ansehen",
+            "ctaSecondaryUrl":"#leistungen"
+          },
+          "settings": { "background": "default", "paddingTop": "xl", "paddingBottom": "xl" }
+        },
+        {
+          "id": "trust-c3d4",
+          "type": "trust",
+          "enabled": true,
+          "areas": { "content": 1 },
+          "data": {
+            "title": "Vertrauen seit über 20 Jahren"
+          },
+          "items": [
+            { "id": "t1", "stat": "500+",    "statLabel": "Zufriedene Kunden" },
+            { "id": "t2", "stat": "20 Jahre", "statLabel": "Erfahrung" },
+            { "id": "t3", "stat": "CHF 50M+", "statLabel": "Verwaltetes Volumen" },
+            { "id": "t4", "stat": "3",        "statLabel": "Standorte" }
+          ],
+          "settings": { "background": "alt", "textAlign": "center" }
+        },
+        {
+          "id": "services-e5f6",
+          "type": "services",
+          "enabled": true,
+          "areas": { "grid": 3 },
+          "data": {
+            "label":    "Unsere Leistungen",
+            "title":    "Was wir für Sie tun",
+            "subtitle": "Umfassende Treuhand-Dienstleistungen für KMU und Privatpersonen."
+          },
+          "items": [
+            { "id": "s1", "icon": "📊", "title": "Buchhaltung",       "body": "Finanzbuchhaltung, Lohnbuchhaltung und Jahresabschluss nach OR." },
+            { "id": "s2", "icon": "🧾", "title": "Steuerberatung",    "body": "Steuererklärungen, Steueroptimierung und Vertretung gegenüber Behörden." },
+            { "id": "s3", "icon": "🏢", "title": "Unternehmensberatung", "body": "Firmengründung, Umstrukturierung und strategische Beratung." }
+          ],
+          "settings": { "background": "default" }
+        },
+        {
+          "id": "testimonials-g7h8",
+          "type": "testimonials",
+          "enabled": true,
+          "areas": { "grid": 3 },
+          "data": {
+            "label": "Kundenstimmen",
+            "title": "Was unsere Kunden sagen"
+          },
+          "items": [
+            { "id": "r1", "name": "Anna Meier",  "role": "Geschäftsführerin", "company": "Meier GmbH",    "body": "Seit Jahren verlässlicher Partner. Kompetent, pünktlich, proaktiv.", "rating": 5 },
+            { "id": "r2", "name": "Peter Huber", "role": "Inhaber",          "company": "Huber Schreinerei", "body": "Endlich ein Treuhänder, der unsere Branche versteht.", "rating": 5 },
+            { "id": "r3", "name": "Sandra Frei", "role": "CFO",              "company": "Frei & Partner AG", "body": "Professionelle Steueroptimierung hat uns signifikant entlastet.", "rating": 5 }
+          ],
+          "settings": { "background": "alt" }
+        },
+        {
+          "id": "cta-i9j0",
+          "type": "cta",
+          "enabled": true,
+          "areas": { "content": 1 },
+          "data": {
+            "title":         "Bereit für eine unverbindliche Erstberatung?",
+            "subtitle":      "Wir nehmen uns Zeit für Ihre Situation. Kostenlos und ohne Verpflichtung.",
+            "ctaPrimary":    "Jetzt Termin vereinbaren",
+            "ctaPrimaryUrl": "#kontakt"
+          },
+          "settings": { "background": "brand", "textAlign": "center", "paddingTop": "xl", "paddingBottom": "xl" }
+        },
+        {
+          "id": "footer-k1l2",
+          "type": "footer",
+          "enabled": true,
+          "areas": { "content": 1 },
+          "data": {
+            "title": "Muster Treuhand AG"
+          },
+          "settings": { "background": "dark" }
+        }
+      ]
+    }
+  ],
+
+  "seo": {
+    "titleTemplate":    "%s | Muster Treuhand AG",
+    "defaultDescription": "Muster Treuhand AG – Ihr Partner für Buchhaltung, Steuerberatung und Unternehmensberatung in Bern.",
+    "locale":           "de_CH",
+    "robots":           "index, follow"
+  },
+
+  "legal": {
+    "cookieBanner":   false,
+    "companyName":    "Muster Treuhand AG",
+    "companyAddress": "Musterstrasse 1, 3000 Bern"
+  }
+}
+;
+
+let currentMode    = "visual"
+let currentPreset  = "swiss"
+let currentComplex = 5
+// BUG-H fix: track whether DSL was manually edited
+let dslDirty       = false
+let lastHTML       = ""
+let lastDSL        = null
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+document.getElementById("dslEditor").value = JSON.stringify(EXAMPLE_DSL, null, 2)
+document.getElementById("dslEditor").addEventListener("input", () => { dslDirty = true })
+compile()
+
+// ════════════════════════════════════════════════
+// MODE SWITCH
+// ════════════════════════════════════════════════
+window.setMode = function(mode) {
+  currentMode = mode
+  document.querySelectorAll(".mode-tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode))
+  document.getElementById("visualPanel").style.display = mode === "visual" ? "block" : "none"
+  document.getElementById("dslPanel").style.display    = mode === "dsl"    ? "block" : "none"
+
+  // BUG-H fix: only overwrite editor if not manually dirty
+  if (mode === "dsl" && !dslDirty) {
+    try {
+      document.getElementById("dslEditor").value = JSON.stringify(buildDSLFromVisual(), null, 2)
+    } catch(e) {}
+  }
+}
+
+// ════════════════════════════════════════════════
+// CHIPS
+// ════════════════════════════════════════════════
+window.setPreset = function(el) {
+  document.querySelectorAll(".chip[data-preset]").forEach(c => c.classList.remove("active"))
+  el.classList.add("active")
+  currentPreset = el.dataset.preset
+  syncFromVisual()
+}
+
+window.setComplexity = function(el) {
+  document.querySelectorAll(".chip[data-c]").forEach(c => c.classList.remove("active"))
+  el.classList.add("active")
+  currentComplex = parseInt(el.dataset.c)
+  syncFromVisual()
+}
+
+// ════════════════════════════════════════════════
+// VIEWPORT — BUG-E fix
+// ════════════════════════════════════════════════
+window.setViewport = function(el) {
+  document.querySelectorAll(".vp-btn").forEach(b => b.classList.remove("active"))
+  el.classList.add("active")
+  const frame = document.getElementById("previewFrame")
+  if (el.dataset.w === "fill") {
+    frame.style.width    = "100%"
+    frame.style.maxWidth = ""
+  } else {
+    frame.style.width    = el.dataset.w
+    frame.style.maxWidth = el.dataset.w
+  }
+}
+
+// ════════════════════════════════════════════════
+// BUILD DSL — BUG-F fix: pages auto-composed when industry/complexity change
+// ════════════════════════════════════════════════
+function buildDSLFromVisual() {
+  const industry   = document.getElementById("industry").value
+  const pageType   = document.getElementById("pageType").value
+  const complexity = currentComplex
+
+  // If industry or complexity differs from example, drop fixed sections
+  // so compiler auto-composes them via composePage()
+  const exampleIndustry = EXAMPLE_DSL.site.industry
+  const exampleComplex  = EXAMPLE_DSL.site.complexity
+  const sameConfig = (industry === exampleIndustry && complexity === exampleComplex && pageType === EXAMPLE_DSL.site.pageType)
+
+  const pages = sameConfig
+    ? EXAMPLE_DSL.pages                                    // keep example content
+    : [{ id: "home", kind: pageType, title: document.getElementById("siteName").value || "Start" }]  // auto-compose
+
+  return {
+    ...EXAMPLE_DSL,
+    site: {
+      ...EXAMPLE_DSL.site,
+      name:       document.getElementById("siteName").value || "Meine Website",
+      industry,
+      pageType,
+      complexity,
+    },
+    theme: {
+      preset:       currentPreset,
+      density:      document.getElementById("density").value,
+      spacingScale: parseFloat(document.getElementById("spacingScale").value),
+      radius:       document.getElementById("radius").value,
+      brand: {
+        primary: document.getElementById("colorPrimary").value,
+        accent:  document.getElementById("colorAccent").value,
+        bg:      document.getElementById("colorBg").value,
+        text:    document.getElementById("colorText").value,
+      }
+    },
+    pages,
+    legal: EXAMPLE_DSL.legal,
+    seo:   { ...EXAMPLE_DSL.seo },
+  }
+}
+
+// ════════════════════════════════════════════════
+// SYNC (debounced)
+// ════════════════════════════════════════════════
+window.syncFromVisual = function() {
+  if (currentMode === "dsl" && !dslDirty) {
+    try {
+      document.getElementById("dslEditor").value = JSON.stringify(buildDSLFromVisual(), null, 2)
+    } catch(e) {}
+  }
+  clearTimeout(window._compileTimer)
+  window._compileTimer = setTimeout(compile, 150)
+}
+
+// ════════════════════════════════════════════════
+// COMPILE — BUG-J fix: errors shown in both modes
+// ════════════════════════════════════════════════
+window.compile = function() {
+  const spinner = document.getElementById("spinner")
+  const badge   = document.getElementById("statusBadge")
+  const errEl   = document.getElementById("errorBanner")
+
+  spinner.classList.add("show")
+  errEl.classList.remove("show")
+
+  try {
+    let dsl
+    if (currentMode === "dsl") {
+      dsl = JSON.parse(document.getElementById("dslEditor").value)
+    } else {
+      dsl = buildDSLFromVisual()
+    }
+    lastDSL = dsl
+
+    const t0   = performance.now()
+    const html = compileSite(dsl)
+    const ms   = (performance.now() - t0).toFixed(0)
+    lastHTML   = html
+
+    const frame  = document.getElementById("previewFrame")
+    const blob   = new Blob([html], { type: "text/html; charset=utf-8" })
+    const blobUrl = URL.createObjectURL(blob)
+    // Alte Blob-URL freigeben bevor neue gesetzt wird
+    if (frame._blobUrl) URL.revokeObjectURL(frame._blobUrl)
+    frame._blobUrl = blobUrl
+    frame.src = blobUrl
+
+    const domain = dsl.site?.domain
+      || (dsl.site?.name || "preview").toLowerCase().replace(/\s+/g, "-") + ".ch"
+    document.getElementById("previewUrl").textContent = "https://" + domain
+
+    badge.textContent = ms + "ms"
+    badge.className   = "topbar__status ok"
+
+  } catch(err) {
+    badge.textContent = "Fehler"
+    badge.className   = "topbar__status err"
+    // BUG-J fix: show error in both modes
+    errEl.textContent = err.message
+    errEl.classList.add("show")
+    console.error("compile:", err)
+  } finally {
+    spinner.classList.remove("show")
+  }
+}
+
+// ════════════════════════════════════════════════
+// EXPORT — BUG-G fix: filename from site name/domain
+// ════════════════════════════════════════════════
+window.downloadHTML = function() {
+  if (!lastHTML) return
+  const siteName = lastDSL?.site?.domain
+    || (lastDSL?.site?.name || "website").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
+  const filename = siteName.endsWith(".ch") || siteName.endsWith(".com") ? siteName : siteName + ".html"
+  const blob = new Blob([lastHTML], { type: "text/html" })
+  const a    = Object.assign(document.createElement("a"), {
+    href: URL.createObjectURL(blob), download: filename
+  })
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
+
+// BUG-A fix: btn passed explicitly, no event global
+window.copyDSL = function(btn) {
+  let dsl
+  try {
+    dsl = currentMode === "dsl"
+      ? document.getElementById("dslEditor").value
+      : JSON.stringify(buildDSLFromVisual(), null, 2)
+  } catch(e) { return }
+  navigator.clipboard.writeText(dsl).then(() => {
+    const old = btn.textContent
+    btn.textContent = "✓ Kopiert"
+    setTimeout(() => btn.textContent = old, 1200)
+  })
+}
+
+// BUG-D fix: resetToExample uses EXAMPLE_DSL.theme.preset
+window.resetToExample = function() {
+  dslDirty = false
+  document.getElementById("dslEditor").value  = JSON.stringify(EXAMPLE_DSL, null, 2)
+  document.getElementById("siteName").value   = EXAMPLE_DSL.site.name
+  document.getElementById("industry").value   = EXAMPLE_DSL.site.industry
+  document.getElementById("pageType").value   = EXAMPLE_DSL.site.pageType
+  document.getElementById("density").value    = EXAMPLE_DSL.theme.density    || "balanced"
+  document.getElementById("spacingScale").value = String(EXAMPLE_DSL.theme.spacingScale || 1.0)
+  document.getElementById("spacingVal").textContent = parseFloat(EXAMPLE_DSL.theme.spacingScale || 1.0).toFixed(2)
+
+  // BUG-D fix: use actual preset from EXAMPLE_DSL
+  const preset = EXAMPLE_DSL.theme.preset || "swiss"
+  currentPreset = preset
+  document.querySelectorAll(".chip[data-preset]").forEach(c =>
+    c.classList.toggle("active", c.dataset.preset === preset)
+  )
+
+  currentComplex = EXAMPLE_DSL.site.complexity || 5
+  document.querySelectorAll(".chip[data-c]").forEach(c =>
+    c.classList.toggle("active", parseInt(c.dataset.c) === currentComplex)
+  )
+
+  compile()
+}
+
+// ════════════════════════════════════════════════
+// KEYBOARD
+// ════════════════════════════════════════════════
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+    e.preventDefault()
+    compile()
+  }
+})
+</script>
+
+</body>
+</html>

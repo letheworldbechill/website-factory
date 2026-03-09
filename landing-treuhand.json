@@ -1,0 +1,146 @@
+{
+  "version": "1.0",
+
+  "site": {
+    "name": "Muster Treuhand AG",
+    "language": "de-CH",
+    "industry": "treuhand",
+    "pageType": "landing",
+    "complexity": 5,
+    "domain": "muster-treuhand.ch",
+    "tagline": "Buchhaltung, Steuern und Beratung – aus einer Hand.",
+    "contact": {
+      "email": "info@muster-treuhand.ch",
+      "phone": "+41 31 000 00 00",
+      "city": "Bern",
+      "country": "CH"
+    }
+  },
+
+  "theme": {
+    "preset": "swiss",
+    "density": "airy",
+    "spacingScale": 1.1,
+    "brand": {
+      "primary": "#1a365d",
+      "accent":  "#38a169"
+    },
+    "font": {
+      "display": "Instrument Sans",
+      "body":    "Instrument Sans"
+    }
+  },
+
+  "pages": [
+    {
+      "id": "home",
+      "kind": "landing",
+      "title": "Professionelle Treuhanddienstleistungen in Bern",
+      "description": "Muster Treuhand AG – Ihr Partner für Buchhaltung, Steuerberatung und Unternehmensberatung in Bern.",
+      "slug": "/",
+      "sections": [
+        {
+          "id": "hero-a1b2",
+          "type": "hero",
+          "enabled": true,
+          "areas": { "content": 8, "image": 5 },
+          "data": {
+            "label":          "Treuhand in Bern",
+            "title":          "Ihr Partner für Treuhand & Finanzen",
+            "subtitle":       "Professionelle Buchhaltung, Steuern und Unternehmensberatung – damit Sie sich auf Ihr Kerngeschäft konzentrieren können.",
+            "ctaPrimary":     "Erstberatung anfragen",
+            "ctaPrimaryUrl":  "#kontakt",
+            "ctaSecondary":   "Leistungen ansehen",
+            "ctaSecondaryUrl":"#leistungen"
+          },
+          "settings": { "background": "default", "paddingTop": "xl", "paddingBottom": "xl" }
+        },
+        {
+          "id": "trust-c3d4",
+          "type": "trust",
+          "enabled": true,
+          "areas": { "content": 1 },
+          "data": {
+            "title": "Vertrauen seit über 20 Jahren"
+          },
+          "items": [
+            { "id": "t1", "stat": "500+",    "statLabel": "Zufriedene Kunden" },
+            { "id": "t2", "stat": "20 Jahre", "statLabel": "Erfahrung" },
+            { "id": "t3", "stat": "CHF 50M+", "statLabel": "Verwaltetes Volumen" },
+            { "id": "t4", "stat": "3",        "statLabel": "Standorte" }
+          ],
+          "settings": { "background": "alt", "textAlign": "center" }
+        },
+        {
+          "id": "services-e5f6",
+          "type": "services",
+          "enabled": true,
+          "areas": { "grid": 3 },
+          "data": {
+            "label":    "Unsere Leistungen",
+            "title":    "Was wir für Sie tun",
+            "subtitle": "Umfassende Treuhand-Dienstleistungen für KMU und Privatpersonen."
+          },
+          "items": [
+            { "id": "s1", "icon": "📊", "title": "Buchhaltung",       "body": "Finanzbuchhaltung, Lohnbuchhaltung und Jahresabschluss nach OR." },
+            { "id": "s2", "icon": "🧾", "title": "Steuerberatung",    "body": "Steuererklärungen, Steueroptimierung und Vertretung gegenüber Behörden." },
+            { "id": "s3", "icon": "🏢", "title": "Unternehmensberatung", "body": "Firmengründung, Umstrukturierung und strategische Beratung." }
+          ],
+          "settings": { "background": "default" }
+        },
+        {
+          "id": "testimonials-g7h8",
+          "type": "testimonials",
+          "enabled": true,
+          "areas": { "grid": 3 },
+          "data": {
+            "label": "Kundenstimmen",
+            "title": "Was unsere Kunden sagen"
+          },
+          "items": [
+            { "id": "r1", "name": "Anna Meier",  "role": "Geschäftsführerin", "company": "Meier GmbH",    "body": "Seit Jahren verlässlicher Partner. Kompetent, pünktlich, proaktiv.", "rating": 5 },
+            { "id": "r2", "name": "Peter Huber", "role": "Inhaber",          "company": "Huber Schreinerei", "body": "Endlich ein Treuhänder, der unsere Branche versteht.", "rating": 5 },
+            { "id": "r3", "name": "Sandra Frei", "role": "CFO",              "company": "Frei & Partner AG", "body": "Professionelle Steueroptimierung hat uns signifikant entlastet.", "rating": 5 }
+          ],
+          "settings": { "background": "alt" }
+        },
+        {
+          "id": "cta-i9j0",
+          "type": "cta",
+          "enabled": true,
+          "areas": { "content": 1 },
+          "data": {
+            "title":         "Bereit für eine unverbindliche Erstberatung?",
+            "subtitle":      "Wir nehmen uns Zeit für Ihre Situation. Kostenlos und ohne Verpflichtung.",
+            "ctaPrimary":    "Jetzt Termin vereinbaren",
+            "ctaPrimaryUrl": "#kontakt"
+          },
+          "settings": { "background": "brand", "textAlign": "center", "paddingTop": "xl", "paddingBottom": "xl" }
+        },
+        {
+          "id": "footer-k1l2",
+          "type": "footer",
+          "enabled": true,
+          "areas": { "content": 1 },
+          "data": {
+            "title": "Muster Treuhand AG"
+          },
+          "settings": { "background": "dark" }
+        }
+      ]
+    }
+  ],
+
+  "seo": {
+    "titleTemplate":    "%s | Muster Treuhand AG",
+    "defaultDescription": "Muster Treuhand AG – Ihr Partner für Buchhaltung, Steuerberatung und Unternehmensberatung in Bern.",
+    "locale":           "de_CH",
+    "robots":           "index, follow"
+  },
+
+  "legal": {
+    "cookieBanner":   false,
+    "companyName":    "Muster Treuhand AG",
+    "companyAddress": "Musterstrasse 1, 3000 Bern"
+  }
+}

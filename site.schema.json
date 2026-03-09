@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://website-factory/schema/site.schema.json",
+  "title": "Website Factory — Site",
+  "description": "Top-Level DSL: beschreibt eine vollständige Website-Konfiguration.",
+  "type": "object",
+  "required": ["version", "site", "theme", "pages"],
+  "additionalProperties": false,
+
+  "properties": {
+
+    "version": {
+      "type": "string",
+      "description": "Schema-Version für Migrations-Handling.",
+      "enum": ["1.0"],
+      "default": "1.0"
+    },
+
+    "site": { "$ref": "./site-meta.schema.json" },
+    "theme": { "$ref": "./theme.schema.json" },
+    "pages": {
+      "type": "array",
+      "description": "Mindestens eine Seite. Reihenfolge = Navigationsreihenfolge.",
+      "minItems": 1,
+      "items": { "$ref": "./page.schema.json" }
+    },
+
+    "seo": {
+      "type": "object",
+      "description": "Globale SEO-Defaults. Werden pro Page überschreibbar.",
+      "additionalProperties": false,
+      "properties": {
+        "titleTemplate": {
+          "type": "string",
+          "description": "z.B. '%s | Muster Treuhand'. %s wird durch Page-Titel ersetzt.",
+          "default": "%s"
+        },
+        "defaultDescription": { "type": "string", "maxLength": 160 },
+        "ogImage":           { "type": "string", "format": "uri-reference" },
+        "canonical":         { "type": "string", "format": "uri-reference" },
+        "locale":            { "type": "string", "default": "de_CH" },
+        "robots":            { "type": "string", "default": "index, follow" }
+      }
+    },
+
+    "tracking": {
+      "type": "object",
+      "description": "Optionale Tracking-Snippets. Werden nur gerendert wenn vorhanden.",
+      "additionalProperties": false,
+      "properties": {
+        "googleAnalytics": { "type": "string", "description": "GA4 Measurement-ID, z.B. G-XXXXXXXXXX" },
+        "plausible":       { "type": "string", "description": "Domain für Plausible Analytics" },
+        "customHead":      { "type": "string", "description": "Beliebiges HTML für <head>" },
+        "customBody":      { "type": "string", "description": "Beliebiges HTML nach <body>" }
+      }
+    },
+
+    "legal": {
+      "type": "object",
+      "description": "Rechtliche Pflichtangaben. Werden im Footer referenziert.",
+      "additionalProperties": false,
+      "properties": {
+        "cookieBanner":    { "type": "boolean", "default": false },
+        "imprintUrl":      { "type": "string", "format": "uri-reference" },
+        "privacyUrl":      { "type": "string", "format": "uri-reference" },
+        "agbUrl":          { "type": "string", "format": "uri-reference" },
+        "companyName":     { "type": "string" },
+        "companyAddress":  { "type": "string" },
+        "vatId":           { "type": "string" }
+      }
+    },
+
+    "assets": {
+      "type": "object",
+      "description": "Globale Asset-Referenzen.",
+      "additionalProperties": false,
+      "properties": {
+        "logo":    { "type": "string", "format": "uri-reference" },
+        "favicon": { "type": "string", "format": "uri-reference" },
+        "fonts":   {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["family", "url"],
+            "properties": {
+              "family": { "type": "string" },
+              "url":    { "type": "string", "format": "uri" },
+              "weight": { "type": "string", "default": "400 700" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://website-factory/schema/page.schema.json",
+  "title": "Page",
+  "description": "Eine einzelne Seite. Enthält geordnete Sections.",
+  "type": "object",
+  "required": ["id", "kind"],
+  "additionalProperties": false,
+
+  "properties": {
+
+    "id": {
+      "type": "string",
+      "description": "Eindeutige ID. Wird als Dateiname verwendet (z.B. 'home' → index.html, 'leistungen' → leistungen.html).",
+      "pattern": "^[a-z0-9-]+$",
+      "examples": ["home", "leistungen", "ueber-uns", "kontakt"]
+    },
+
+    "kind": {
+      "type": "string",
+      "description": "Seitentyp dieser konkreten Page. Kann vom globalen pageType abweichen.",
+      "enum": ["landing", "sales", "company", "portfolio", "legal", "contact", "custom"],
+      "default": "landing"
+    },
+
+    "title": {
+      "type": "string",
+      "description": "SEO-Titel dieser Seite. Wird in titleTemplate eingesetzt.",
+      "maxLength": 70
+    },
+
+    "description": {
+      "type": "string",
+      "description": "Meta-Description dieser Seite.",
+      "maxLength": 160
+    },
+
+    "slug": {
+      "type": "string",
+      "description": "URL-Pfad. Default: id. '/' für die Startseite.",
+      "default": "/"
+    },
+
+    "nav": {
+      "type": "object",
+      "description": "Navigations-Einstellungen für diese Seite.",
+      "additionalProperties": false,
+      "properties": {
+        "label":   { "type": "string", "description": "Label in der Navigation." },
+        "hidden":  { "type": "boolean", "default": false },
+        "order":   { "type": "integer" }
+      }
+    },
+
+    "sections": {
+      "type": "array",
+      "description": "Geordnete Liste der Sections. Leer = Page Composer füllt automatisch.",
+      "items": { "$ref": "./section.schema.json" }
+    }
+  }
+}

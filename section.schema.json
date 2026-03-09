@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://website-factory/schema/section.schema.json",
+  "title": "Section",
+  "description": "Ein einzelner Inhaltsblock. Kleinste eigenständige Einheit der Factory.",
+  "type": "object",
+  "required": ["id", "type"],
+  "additionalProperties": false,
+
+  "properties": {
+
+    "id": {
+      "type": "string",
+      "description": "Eindeutige ID innerhalb der Page. Format: '<type>-<shortid>'.",
+      "pattern": "^[a-z]+-[a-z0-9]+$",
+      "examples": ["hero-a1b2", "services-x9y8", "faq-m3n4"]
+    },
+
+    "type": {
+      "type": "string",
+      "description": "Section-Typ. Bestimmt welche data-Felder erwartet werden.",
+      "enum": [
+        "header",
+        "hero",
+        "trust",
+        "authority",
+        "services",
+        "benefits",
+        "process",
+        "team",
+        "gallery",
+        "testimonials",
+        "faq",
+        "cta",
+        "footer",
+        "contact",
+        "pricing",
+        "custom"
+      ]
+    },
+
+    "enabled": {
+      "type": "boolean",
+      "description": "false = Section wird im Compiler übersprungen.",
+      "default": true
+    },
+
+    "areas": {
+      "type": "object",
+      "description": "Fibonacci-Gewichte für das Layout. Keys = Spaltenname, Values = fr-Einheiten (1,2,3,5,8,13).",
+      "additionalProperties": false,
+      "default": { "content": 1 },
+      "properties": {
+        "content":  { "$ref": "#/$defs/fibValue" },
+        "image":    { "$ref": "#/$defs/fibValue" },
+        "aside":    { "$ref": "#/$defs/fibValue" },
+        "grid":     { "$ref": "#/$defs/fibValue" },
+        "list":     { "$ref": "#/$defs/fibValue" },
+        "left":     { "$ref": "#/$defs/fibValue" },
+        "right":    { "$ref": "#/$defs/fibValue" }
+      }
+    },
+
+    "pattern": {
+      "type": "string",
+      "description": "Optionaler Override für den Pattern Selector. Normalerweise automatisch gewählt.",
+      "enum": ["hero", "text", "split", "cards", "grid", "list", "faq", "process", "cta", "gallery", "testimonials"]
+    },
+
+    "data": {
+      "$ref": "#/$defs/sectionData"
+    },
+
+    "items": {
+      "type": "array",
+      "description": "Wiederholende Elemente (Karten, FAQ-Einträge, Testimonials etc.).",
+      "items": { "$ref": "#/$defs/sectionItem" }
+    },
+
+    "settings": {
+      "type": "object",
+      "description": "Visuelle Einstellungen für diese Section.",
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "type": "string",
+          "enum": ["default", "alt", "brand", "dark", "transparent"],
+          "default": "default"
+        },
+        "paddingTop":    { "type": "string", "enum": ["none", "sm", "md", "lg", "xl"], "default": "lg" },
+        "paddingBottom": { "type": "string", "enum": ["none", "sm", "md", "lg", "xl"], "default": "lg" },
+        "maxWidth":      { "type": "string", "enum": ["sm", "md", "lg", "full"], "default": "lg" },
+        "textAlign":     { "type": "string", "enum": ["left", "center", "right"], "default": "left" },
+        "divider":       { "type": "boolean", "default": false }
+      }
+    }
+  },
+
+  "$defs": {
+
+    "fibValue": {
+      "type": "integer",
+      "description": "Fibonacci-Layoutwert: 1, 2, 3, 5, 8 oder 13.",
+      "enum": [1, 2, 3, 5, 8, 13]
+    },
+
+    "sectionData": {
+      "type": "object",
+      "description": "Inhaltsfelder der Section. Felder sind typ-abhängig.",
+      "additionalProperties": true,
+      "properties": {
+        "title":        { "type": "string", "maxLength": 120 },
+        "subtitle":     { "type": "string", "maxLength": 200 },
+        "body":         { "type": "string" },
+        "ctaPrimary":   { "type": "string", "maxLength": 60 },
+        "ctaPrimaryUrl":  { "type": "string", "format": "uri-reference" },
+        "ctaSecondary": { "type": "string", "maxLength": 60 },
+        "ctaSecondaryUrl": { "type": "string", "format": "uri-reference" },
+        "label":        { "type": "string", "maxLength": 60, "description": "Eyebrow-Label über dem Titel." },
+        "image":        { "type": "string", "format": "uri-reference" },
+        "imageAlt":     { "type": "string", "maxLength": 200 },
+        "stat":         { "type": "string", "description": "Kennzahl (z.B. '98%' oder '15+ Jahre')." },
+        "statLabel":    { "type": "string" }
+      }
+    },
+
+    "sectionItem": {
+      "type": "object",
+      "description": "Einzelnes Element in einer items-Liste.",
+      "required": ["id"],
+      "additionalProperties": true,
+      "properties": {
+        "id":       { "type": "string" },
+        "title":    { "type": "string", "maxLength": 100 },
+        "body":     { "type": "string" },
+        "icon":     { "type": "string", "description": "Icon-Bezeichner oder Emoji." },
+        "image":    { "type": "string", "format": "uri-reference" },
+        "imageAlt": { "type": "string" },
+        "url":      { "type": "string", "format": "uri-reference" },
+        "label":    { "type": "string" },
+        "stat":     { "type": "string" },
+        "name":     { "type": "string", "description": "Für Testimonials: Personenname." },
+        "role":     { "type": "string", "description": "Für Testimonials / Team: Rolle." },
+        "company":  { "type": "string" },
+        "rating":   { "type": "integer", "minimum": 1, "maximum": 5 },
+        "stat":      { "type": "string", "description": "Kennzahl (z.B. '500+' oder 'CHF 50M+'). Für trust-Items." },
+        "statLabel": { "type": "string", "description": "Beschriftung zur Kennzahl. Für trust-Items." },
+        "question":  { "type": "string", "description": "Für FAQ: Frage." },
+        "answer":    { "type": "string", "description": "Für FAQ: Antwort." },
+        "step":      { "type": "integer", "description": "Für Process: Schrittnummer." }
+      }
+    }
+  }
+}

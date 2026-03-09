@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://website-factory/schema/site-meta.schema.json",
+  "title": "Site Meta",
+  "description": "Globale Eigenschaften der Website. Steuern Page Composer, Industry Extensions und Complexity.",
+  "type": "object",
+  "required": ["name", "industry", "pageType"],
+  "additionalProperties": false,
+
+  "properties": {
+
+    "name": {
+      "type": "string",
+      "description": "Markenname / Firma. Wird im Title-Tag und Footer verwendet.",
+      "minLength": 1,
+      "maxLength": 80,
+      "examples": ["Muster Treuhand AG", "Studio Lenz", "KMU Digital"]
+    },
+
+    "language": {
+      "type": "string",
+      "description": "BCP-47 Sprachcode. Steuert lang-Attribut und Mikrocopy-Sprache.",
+      "default": "de-CH",
+      "examples": ["de-CH", "de-DE", "de-AT", "fr-CH", "en"]
+    },
+
+    "industry": {
+      "type": "string",
+      "description": "Fachlicher Kontext. Steuert Industry-Extensions im Page Composer.",
+      "enum": [
+        "treuhand",
+        "kanzlei",
+        "it",
+        "saas",
+        "restaurant",
+        "handwerk",
+        "immobilien",
+        "medizin",
+        "coaching",
+        "bildung",
+        "generic"
+      ]
+    },
+
+    "pageType": {
+      "type": "string",
+      "description": "Seitenarchitektur. Bestimmt die Basis-Section-Menge.",
+      "enum": ["landing", "sales", "company", "portfolio", "onepage"],
+      "default": "landing"
+    },
+
+    "complexity": {
+      "type": "integer",
+      "description": "Umfang der Seite. Fibonacci-Wert: 1=minimal, 3=kompakt, 5=standard, 8=vollständig.",
+      "enum": [1, 3, 5, 8],
+      "default": 5
+    },
+
+    "domain": {
+      "type": "string",
+      "description": "Ziel-Domain ohne Protokoll. Für Canonical-URLs und Sitemap.",
+      "pattern": "^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
+      "examples": ["example.ch", "muster-treuhand.de"]
+    },
+
+    "tagline": {
+      "type": "string",
+      "description": "Kurzer Claim / Slogan. Optional für Hero und Meta-Description.",
+      "maxLength": 120
+    },
+
+    "contact": {
+      "type": "object",
+      "description": "Kontaktdaten. Werden in JSON-LD, Footer und Kontakt-Sections verwendet.",
+      "additionalProperties": false,
+      "properties": {
+        "email":   { "type": "string", "format": "email" },
+        "phone":   { "type": "string" },
+        "address": { "type": "string" },
+        "city":    { "type": "string" },
+        "zip":     { "type": "string" },
+        "country": { "type": "string", "default": "CH" }
+      }
+    }
+  }
+}

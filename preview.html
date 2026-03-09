@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Professionelle Treuhanddienstleistungen in Bern | Muster Treuhand AG</title>
+<meta name="description" content="Muster Treuhand AG – Ihr Partner für Buchhaltung, Steuerberatung und Unternehmensberatung in Bern.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://muster-treuhand.ch">
+<meta property="og:title" content="Professionelle Treuhanddienstleistungen in Bern | Muster Treuhand AG">
+<meta property="og:description" content="Muster Treuhand AG – Ihr Partner für Buchhaltung, Steuerberatung und Unternehmensberatung in Bern.">
+<meta property="og:locale" content="de_CH">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--c-bg); color: var(--c-text); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+:root {
+  /* Colors */
+  --c-primary:    #1a365d;
+  --c-accent:     #38a169;
+  --c-bg:         #ffffff;
+  --c-bg-alt:     #f7f8fa;
+  --c-surface:    #ffffff;
+  --c-text:       #0a0a0a;
+  --c-text-light: #3f3f46;
+  --c-text-muted: #71717a;
+  --c-border:     #e4e4e7;
+
+  /* Typography */
+  --font-display: Instrument Sans, system-ui, sans-serif;
+  --font-body:    Instrument Sans, system-ui, sans-serif;
+  --font-mono:    ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --fs-xs:   11px;
+  --fs-sm:   13px;
+  --fs-base: 15px;
+  --fs-lg:   17px;
+  --fs-xl:   20px;
+  --fs-2xl:  24px;
+  --fs-3xl:  32px;
+  --fs-4xl:  40px;
+
+  --lh-tight:   1.2;
+  --lh-normal:  1.5;
+  --lh-relaxed: 1.7;
+
+  --tracking-tight:  -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.08em;
+
+  /* Spacing (4px-Grid × 1.32) */
+  --sp-1:  5px;
+  --sp-2:  11px;
+  --sp-3:  16px;
+  --sp-4:  21px;
+  --sp-5:  26px;
+  --sp-6:  32px;
+  --sp-8:  42px;
+  --sp-10: 53px;
+  --sp-12: 63px;
+  --sp-16: 84px;
+
+  /* Section Padding */
+  --pt-none: 0;
+  --pt-sm:   32px;
+  --pt-md:   53px;
+  --pt-lg:   84px;
+  --pt-xl:   127px;
+
+  /* Radius */
+  --r-sm:   4px;
+  --r-md:   8px;
+  --r-lg:   12px;
+  --r-pill: 999px;
+
+  /* Shadows */
+  --sh-soft:    0 4px 12px rgba(0,0,0,0.06);
+  --sh-medium:  0 8px 24px rgba(0,0,0,0.10);
+  --sh-deep:    0 18px 45px rgba(0,0,0,0.16);
+
+  /* Transitions */
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast:  150ms;
+  --duration-norm:  220ms;
+
+  /* Layout */
+  --page-max:  1120px;
+  --container: min(var(--page-max), 100% - var(--sp-8) * 2);
+}
+
+/* Background utilities */
+.bg--default     { background: var(--c-bg); }
+.bg--alt         { background: var(--c-bg-alt); }
+.bg--brand       { background: var(--c-primary); color: #fff; }
+.bg--dark        { background: #111; color: #f5f5f5; }
+.bg--transparent { background: transparent; }
+
+/* Section padding utilities */
+.section--pt-none { padding-top: var(--pt-none); }
+.section--pt-sm   { padding-top: var(--pt-sm);   }
+.section--pt-md   { padding-top: var(--pt-md);   }
+.section--pt-lg   { padding-top: var(--pt-lg);   }
+.section--pt-xl   { padding-top: var(--pt-xl);   }
+
+.section--pb-none { padding-bottom: var(--pt-none); }
+.section--pb-sm   { padding-bottom: var(--pt-sm);   }
+.section--pb-md   { padding-bottom: var(--pt-md);   }
+.section--pb-lg   { padding-bottom: var(--pt-lg);   }
+.section--pb-xl   { padding-bottom: var(--pt-xl);   }
+
+/* Text alignment */
+.text--left   { text-align: left;   }
+.text--center { text-align: center; }
+.text--right  { text-align: right;  }
+
+/* Layout */
+.container    { width: var(--container); margin-inline: auto; }
+.container--sm { max-width: 720px; margin-inline: auto; }
+
+.layout-stack  { display: flex; flex-direction: column; gap: var(--sp-6); }
+.layout-split  { display: grid; gap: var(--sp-8); }
+.layout-triple { display: grid; gap: var(--sp-6); }
+.layout-grid   { display: grid; gap: var(--sp-6); }
+
+@media (min-width: 768px) {
+  .layout-split  { grid-template-columns: 8fr 5fr; }
+  .layout-triple { grid-template-columns: repeat(3, 1fr); }
+  .layout-grid   { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+}
+
+/* Card Grid */
+.card-grid   { display: grid; gap: var(--sp-6); }
+.card-grid--2 { grid-template-columns: 1fr; }
+.card-grid--3 { grid-template-columns: 1fr; }
+
+@media (min-width: 640px)  { .card-grid--2 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 768px)  { .card-grid--3 { grid-template-columns: repeat(3, 1fr); } }
+
+/* Trust Grid */
+.trust-grid { display: flex; flex-wrap: wrap; gap: var(--sp-6); justify-content: center; }
+.trust-item { text-align: center; }
+.trust-item__stat  { display: block; font-size: var(--fs-3xl); font-weight: 700; color: var(--c-primary); letter-spacing: var(--tracking-tight); }
+.trust-item__label { display: block; font-size: var(--fs-sm); color: var(--c-text-muted); margin-top: var(--sp-1); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); padding: var(--sp-3) var(--sp-5); border-radius: var(--r-pill); font-family: var(--font-body); font-size: var(--fs-base); font-weight: 500; border: none; cursor: pointer; text-decoration: none; transition: all var(--duration-fast) var(--ease-out); }
+.btn--primary   { background: var(--c-primary); color: #fff; box-shadow: var(--sh-soft); }
+.btn--primary:hover   { transform: translateY(-1px); box-shadow: var(--sh-medium); }
+.btn--secondary { background: transparent; color: var(--c-text); border: 1px solid var(--c-border); }
+.btn--secondary:hover { background: rgba(0,0,0,.04); }
+.btn--inverted  { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.3); }
+.btn--inverted:hover  { background: rgba(255,255,255,.25); }
+.btn-group { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.btn-group--center { justify-content: center; }
+
+/* Eyebrow */
+.eyebrow { font-size: var(--fs-xs); font-weight: 600; letter-spacing: var(--tracking-wide); text-transform: uppercase; color: var(--c-primary); margin-bottom: var(--sp-2); }
+.eyebrow--light { color: rgba(255,255,255,.75); }
+
+/* Section titles */
+.section__title    { font-family: var(--font-display); font-size: var(--fs-3xl); font-weight: 700; letter-spacing: var(--tracking-tight); margin-bottom: var(--sp-3); }
+.section__subtitle { font-size: var(--fs-lg); color: var(--c-text-light); line-height: var(--lh-relaxed); margin-bottom: var(--sp-6); max-width: 640px; }
+.section__label    { font-size: var(--fs-sm); color: var(--c-text-muted); margin-bottom: var(--sp-3); }
+
+/* Hero */
+.hero__title    { font-family: var(--font-display); font-size: clamp(var(--fs-3xl), 5vw, var(--fs-4xl)); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: var(--lh-tight); margin-bottom: var(--sp-4); }
+.hero__subtitle { font-size: var(--fs-lg); color: var(--c-text-light); line-height: var(--lh-relaxed); margin-bottom: var(--sp-6); max-width: 560px; }
+
+/* Card */
+.card { background: var(--c-surface); border-radius: var(--r-lg); border: 1px solid var(--c-border); padding: var(--sp-5); box-shadow: var(--sh-soft); transition: all var(--duration-fast) var(--ease-out); }
+.card:hover { transform: translateY(-2px); box-shadow: var(--sh-medium); }
+.card__icon  { font-size: 2em; margin-bottom: var(--sp-3); }
+.card__title { font-size: var(--fs-lg); font-weight: 600; margin-bottom: var(--sp-2); }
+.card__body  { font-size: var(--fs-base); color: var(--c-text-light); line-height: var(--lh-relaxed); }
+.card__link  { display: inline-block; margin-top: var(--sp-3); font-size: var(--fs-sm); font-weight: 500; color: var(--c-primary); }
+
+/* Testimonial */
+.testimonial { background: var(--c-surface); border-radius: var(--r-lg); border: 1px solid var(--c-border); padding: var(--sp-5); }
+.testimonial__stars  { color: var(--c-accent); font-size: var(--fs-base); margin-bottom: var(--sp-3); }
+.testimonial__body   { font-size: var(--fs-base); color: var(--c-text-light); line-height: var(--lh-relaxed); margin-bottom: var(--sp-4); font-style: italic; }
+.testimonial__author strong { display: block; font-weight: 600; }
+.testimonial__author span   { font-size: var(--fs-sm); color: var(--c-text-muted); }
+
+/* FAQ */
+.faq { display: grid; gap: var(--sp-4); }
+.faq__item { border-bottom: 1px solid var(--c-border); padding-bottom: var(--sp-4); }
+.faq__question { font-weight: 600; font-size: var(--fs-lg); margin-bottom: var(--sp-2); }
+.faq__answer   { color: var(--c-text-light); line-height: var(--lh-relaxed); }
+
+/* Process */
+.process-steps { display: grid; gap: var(--sp-6); list-style: none; padding: 0; margin: 0; }
+.process-step  { display: grid; grid-template-columns: 2.5rem 1fr; gap: var(--sp-4); align-items: start; }
+.process-step__number { width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--c-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--fs-sm); flex-shrink: 0; }
+.process-step__title  { font-weight: 600; font-size: var(--fs-lg); margin-bottom: var(--sp-1); }
+.process-step__body   { color: var(--c-text-light); line-height: var(--lh-relaxed); }
+
+/* Footer */
+.footer__inner   { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-6); margin-bottom: var(--sp-6); }
+.footer__name    { font-weight: 700; font-size: var(--fs-lg); margin-bottom: var(--sp-2); }
+.footer__address,.footer__phone,.footer__email { font-size: var(--fs-sm); opacity: .75; }
+.footer__email a,.footer__phone a { color: inherit; text-decoration: none; }
+.footer__legal   { display: flex; flex-wrap: wrap; gap: var(--sp-4); align-items: flex-start; }
+.footer__legal a { font-size: var(--fs-sm); opacity: .75; text-decoration: none; }
+.footer__legal a:hover { opacity: 1; }
+.footer__copy    { font-size: var(--fs-xs); opacity: .5; border-top: 1px solid rgba(255,255,255,.1); padding-top: var(--sp-4); }
+
+/* Prose */
+.prose { line-height: var(--lh-relaxed); color: var(--c-text-light); max-width: 720px; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+</style>
+</head>
+<body>
+<section class="section section--hero section--pt-xl section--pb-xl" id="hero-a1b2">
+  <div class="container">
+    <div class="layout-split" style="display:grid;grid-template-columns:8fr 5fr;gap:var(--sp-8)">
+      <div class="hero__content">
+        <p class="eyebrow">Treuhand in Bern</p>
+        <h1 class="hero__title">Ihr Partner für Treuhand & Finanzen</h1>
+        <p class="hero__subtitle">Professionelle Buchhaltung, Steuern und Unternehmensberatung – damit Sie sich auf Ihr Kerngeschäft konzentrieren können.</p>
+        
+        <div class="btn-group">
+          <a href="#kontakt" class="btn btn--primary">Erstberatung anfragen</a>
+          <a href="#leistungen" class="btn btn--secondary">Leistungen ansehen</a>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</section>
+<section class="section section--trust bg--alt section--pt-md section--pb-md" id="trust-c3d4">
+  <div class="container">
+    <p class="section__label text--center">Vertrauen seit über 20 Jahren</p>
+    <div class="trust-grid">
+      
+      <div class="trust-item">
+        <span class="trust-item__stat">500+</span>
+        <span class="trust-item__label">Zufriedene Kunden</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-item__stat">20 Jahre</span>
+        <span class="trust-item__label">Erfahrung</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-item__stat">CHF 50M+</span>
+        <span class="trust-item__label">Verwaltetes Volumen</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-item__stat">3</span>
+        <span class="trust-item__label">Standorte</span>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section section--cards bg--default section--pt-lg section--pb-lg" id="services-e5f6">
+  <div class="container">
+    <p class="eyebrow">Unsere Leistungen</p>
+    <h2 class="section__title">Was wir für Sie tun</h2>
+    <p class="section__subtitle">Umfassende Treuhand-Dienstleistungen für KMU und Privatpersonen.</p>
+    <div class="card-grid card-grid--3">
+      
+      <div class="card">
+        <div class="card__icon">📊</div>
+        
+        <h3 class="card__title">Buchhaltung</h3>
+        <p class="card__body">Finanzbuchhaltung, Lohnbuchhaltung und Jahresabschluss nach OR.</p>
+        
+      </div>
+      <div class="card">
+        <div class="card__icon">🧾</div>
+        
+        <h3 class="card__title">Steuerberatung</h3>
+        <p class="card__body">Steuererklärungen, Steueroptimierung und Vertretung gegenüber Behörden.</p>
+        
+      </div>
+      <div class="card">
+        <div class="card__icon">🏢</div>
+        
+        <h3 class="card__title">Unternehmensberatung</h3>
+        <p class="card__body">Firmengründung, Umstrukturierung und strategische Beratung.</p>
+        
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section section--testimonials bg--alt section--pt-lg section--pb-lg" id="testimonials-g7h8">
+  <div class="container">
+    <p class="eyebrow">Kundenstimmen</p>
+    <h2 class="section__title">Was unsere Kunden sagen</h2>
+    <div class="card-grid card-grid--3">
+      
+      <figure class="testimonial">
+        <p class="testimonial__stars" aria-label="5 von 5 Sternen">★★★★★</p>
+        <blockquote class="testimonial__body">Seit Jahren verlässlicher Partner. Kompetent, pünktlich, proaktiv.</blockquote>
+        <figcaption class="testimonial__author">
+          <strong>Anna Meier</strong>
+          <span>Geschäftsführerin, Meier GmbH</span>
+        </figcaption>
+      </figure>
+      <figure class="testimonial">
+        <p class="testimonial__stars" aria-label="5 von 5 Sternen">★★★★★</p>
+        <blockquote class="testimonial__body">Endlich ein Treuhänder, der unsere Branche versteht.</blockquote>
+        <figcaption class="testimonial__author">
+          <strong>Peter Huber</strong>
+          <span>Inhaber, Huber Schreinerei</span>
+        </figcaption>
+      </figure>
+      <figure class="testimonial">
+        <p class="testimonial__stars" aria-label="5 von 5 Sternen">★★★★★</p>
+        <blockquote class="testimonial__body">Professionelle Steueroptimierung hat uns signifikant entlastet.</blockquote>
+        <figcaption class="testimonial__author">
+          <strong>Sandra Frei</strong>
+          <span>CFO, Frei & Partner AG</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+<section class="section section--cta bg--brand section--pt-xl section--pb-xl text--center" id="cta-i9j0">
+  <div class="container container--sm">
+    
+    <h2 class="section__title">Bereit für eine unverbindliche Erstberatung?</h2>
+    <p class="section__subtitle">Wir nehmen uns Zeit für Ihre Situation. Kostenlos und ohne Verpflichtung.</p>
+    
+    <div class="btn-group btn-group--center">
+      <a href="#kontakt" class="btn btn--primary">Jetzt Termin vereinbaren</a>
+      
+    </div>
+  </div>
+</section>
+<footer class="section section--footer bg--dark section--pt-lg section--pb-lg" id="footer-k1l2">
+  <div class="container">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <p class="footer__name">Muster Treuhand AG</p>
+        <p class="footer__address">Musterstrasse 1, 3000 Bern</p>
+        <p class="footer__phone"><a href="tel:+41 31 000 00 00">+41 31 000 00 00</a></p>
+        <p class="footer__email"><a href="mailto:info@muster-treuhand.ch">info@muster-treuhand.ch</a></p>
+      </div>
+      <nav class="footer__legal" aria-label="Rechtliches">
+        
+        
+        
+      </nav>
+    </div>
+    <p class="footer__copy">© 2026 Muster Treuhand AG</p>
+  </div>
+</footer>
+</body>
+</html>

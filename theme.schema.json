@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://website-factory/schema/theme.schema.json",
+  "title": "Theme",
+  "description": "Visuelles System. Unterstützt Presets (CLEAR-4 / fresh tokens) und optionale Overrides.",
+  "type": "object",
+  "required": ["preset"],
+  "additionalProperties": false,
+
+  "properties": {
+
+    "preset": {
+      "type": "string",
+      "description": "Vorgefertigtes Token-Set. 'clear4-*' nutzen das bestehende CLEAR-4 System.",
+      "enum": [
+        "swiss",
+        "editorial",
+        "glass",
+        "signature",
+        "clear4-default",
+        "clear4-handwerk",
+        "clear4-landwirtschaft",
+        "clear4-premium",
+        "clear4-dark"
+      ],
+      "default": "swiss"
+    },
+
+    "density": {
+      "type": "string",
+      "description": "Spacing-Dichte. Multipliziert den spScale-Faktor.",
+      "enum": ["compact", "balanced", "airy"],
+      "default": "balanced"
+    },
+
+    "spacingScale": {
+      "type": "number",
+      "description": "Multiplikator auf das 4px-Basis-Grid. 1.0 = standard, 1.1 = etwas luftiger.",
+      "minimum": 0.5,
+      "maximum": 2.0,
+      "default": 1.0
+    },
+
+    "brand": {
+      "type": "object",
+      "description": "Markenfarben. Überschreiben die Preset-Defaults.",
+      "additionalProperties": false,
+      "properties": {
+        "primary": {
+          "type": "string",
+          "description": "Hauptfarbe. Buttons, Links, Highlights.",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "accent": {
+          "type": "string",
+          "description": "Akzentfarbe. Gold-Töne, sekundäre CTAs.",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "bg": {
+          "type": "string",
+          "description": "Hintergrundfarbe.",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "text": {
+          "type": "string",
+          "description": "Haupttextfarbe.",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      }
+    },
+
+    "font": {
+      "type": "object",
+      "description": "Schriftarten. Überschreiben Preset-Fonts.",
+      "additionalProperties": false,
+      "properties": {
+        "display": {
+          "type": "string",
+          "description": "Display-Schrift für Headings.",
+          "default": "Instrument Sans"
+        },
+        "body": {
+          "type": "string",
+          "description": "Text-Schrift für Fliesstext.",
+          "default": "Inter"
+        },
+        "mono": {
+          "type": "string",
+          "description": "Monospace für Code/Templates.",
+          "default": "ui-monospace, SFMono-Regular, Menlo, monospace"
+        }
+      }
+    },
+
+    "radius": {
+      "type": "string",
+      "description": "Globale Ecken-Rundung. Überschreibt Preset.",
+      "enum": ["none", "subtle", "default", "round", "pill"],
+      "default": "default"
+    },
+
+    "motion": {
+      "type": "string",
+      "description": "Animations-Intensität. 'none' respektiert prefers-reduced-motion.",
+      "enum": ["none", "subtle", "default"],
+      "default": "default"
+    }
+  }
+}
