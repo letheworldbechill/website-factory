@@ -2066,11 +2066,10 @@ let lastHTML       = ""
 let lastDSL        = null
 
 // ════════════════════════════════════════════════
-// INIT
+// INIT (deferred — see bottom of script)
 // ════════════════════════════════════════════════
 document.getElementById("dslEditor").value = JSON.stringify(EXAMPLE_DSL, null, 2)
 document.getElementById("dslEditor").addEventListener("input", () => { dslDirty = true })
-compile()
 
 // ════════════════════════════════════════════════
 // MODE SWITCH
@@ -2096,14 +2095,14 @@ window.setPreset = function(el) {
   document.querySelectorAll(".chip[data-preset]").forEach(c => c.classList.remove("active"))
   el.classList.add("active")
   currentPreset = el.dataset.preset
-  syncFromVisual()
+  window.syncFromVisual()
 }
 
 window.setComplexity = function(el) {
   document.querySelectorAll(".chip[data-c]").forEach(c => c.classList.remove("active"))
   el.classList.add("active")
   currentComplex = parseInt(el.dataset.c)
-  syncFromVisual()
+  window.syncFromVisual()
 }
 
 // ════════════════════════════════════════════════
@@ -2177,7 +2176,7 @@ window.syncFromVisual = function() {
     } catch(e) {}
   }
   clearTimeout(window._compileTimer)
-  window._compileTimer = setTimeout(compile, 150)
+  window._compileTimer = setTimeout(window.compile, 150)
 }
 
 // ════════════════════════════════════════════════
@@ -2282,7 +2281,7 @@ window.resetToExample = function() {
     c.classList.toggle("active", parseInt(c.dataset.c) === currentComplex)
   )
 
-  compile()
+  window.compile()
 }
 
 // ════════════════════════════════════════════════
@@ -2291,9 +2290,14 @@ window.resetToExample = function() {
 document.addEventListener("keydown", e => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
     e.preventDefault()
-    compile()
+    window.compile()
   }
 })
+
+// ════════════════════════════════════════════════
+// INIT — run first compile after all functions are defined
+// ════════════════════════════════════════════════
+window.compile()
 </script>
 
 </body>
