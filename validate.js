@@ -155,7 +155,7 @@ function validate(schema, data, path = "#", rootSchema = null) {
 
 const inputFile = process.argv[2]
 if (!inputFile) {
-  console.error("Usage: node schema/validate.js <dsl-file.json>")
+  console.error("Usage: node validate.js <dsl-file.json>")
   process.exit(1)
 }
 

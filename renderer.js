@@ -7,6 +7,7 @@
 
 import { selectPattern }   from "./patternSelector.js"
 import { composeLayout }   from "./layoutComposer.js"
+import { esc }             from "./escape.js"
 
 import { renderHero }         from "./hero.js"
 import { renderText }         from "./text.js"
@@ -54,7 +55,7 @@ export function renderSection(section, config = {}) {
 
   if (!fn) {
     console.warn(`renderer: Kein Renderer für Pattern '${pattern}' (Section '${section.id}')`)
-    return `<!-- section ${section.id} (${section.type}): kein Renderer -->`
+    return `<!-- section ${esc(section.id)} (${esc(section.type)}): kein Renderer -->`
   }
 
   return fn(section, layout, config)

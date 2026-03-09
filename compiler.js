@@ -73,7 +73,7 @@ function compilePage(page, config) {
 
   const meta = compileMeta(page, config)
   const css  = compileTheme(config.theme)
-  const lang = config.site.language || "de"
+  const lang = esc(config.site.language || "de")
 
   return `<!DOCTYPE html>
 <html lang="${lang}">

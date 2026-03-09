@@ -661,7 +661,7 @@ function parseTheme(raw) {
 function parsePages(rawPages, site) {
   // Keine Pages angegeben → eine Standardseite erzeugen
   if (!rawPages || rawPages.length === 0) {
-    return [{ id: "home", kind: site.pageType || "landing", sections: [] }]
+    return [parsePage({ id: "home", kind: site.pageType || "landing" }, 0)]
   }
   return rawPages.map((raw, idx) => parsePage(raw, idx))
 }
@@ -1180,10 +1180,11 @@ export function renderFooter(section, layout, config) {
 export function renderHero(section, layout) {
   const d       = section.data || {}
   const hasCols = layout.areaNames.length > 1
+  const bg      = esc(section.settings?.background   || "default")
   const ptClass = `section--pt-${esc(section.settings?.paddingTop  || "xl")}`
   const pbClass = `section--pb-${esc(section.settings?.paddingBottom || "xl")}`
 
-  return `<section class="section section--hero ${ptClass} ${pbClass}" id="${esc(section.id)}">
+  return `<section class="section section--hero bg--${bg} ${ptClass} ${pbClass}" id="${esc(section.id)}">
   <div class="container">
     <div class="${hasCols ? "layout-split" : "layout-stack"}"${hasCols ? ` style="${esc(layout.style)}"` : ""}>
       <div class="hero__content">
@@ -1398,7 +1399,7 @@ export function renderSection(section, config = {}) {
 
   if (!fn) {
     console.warn(`renderer: Kein Renderer für Pattern '${pattern}' (Section '${section.id}')`)
-    return `<!-- section ${section.id} (${section.type}): kein Renderer -->`
+    return `<!-- section ${esc(section.id)} (${esc(section.type)}): kein Renderer -->`
   }
 
   return fn(section, layout, config)
@@ -1852,7 +1853,7 @@ function compilePage(page, config) {
 
   const meta = compileMeta(page, config)
   const css  = compileTheme(config.theme)
-  const lang = config.site.language || "de"
+  const lang = esc(config.site.language || "de")
 
   return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -2204,13 +2205,9 @@ window.compile = function() {
     const ms   = (performance.now() - t0).toFixed(0)
     lastHTML   = html
 
-    const frame  = document.getElementById("previewFrame")
-    const blob   = new Blob([html], { type: "text/html; charset=utf-8" })
-    const blobUrl = URL.createObjectURL(blob)
-    // Alte Blob-URL freigeben bevor neue gesetzt wird
-    if (frame._blobUrl) URL.revokeObjectURL(frame._blobUrl)
-    frame._blobUrl = blobUrl
-    frame.src = blobUrl
+    const frame = document.getElementById("previewFrame")
+    const doc   = frame.contentDocument || frame.contentWindow.document
+    doc.open(); doc.write(html); doc.close()
 
     const domain = dsl.site?.domain
       || (dsl.site?.name || "preview").toLowerCase().replace(/\s+/g, "-") + ".ch"
