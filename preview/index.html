@@ -2408,7 +2408,7 @@ window.downloadHTML = function() {
   if (!lastHTML) return
   const siteName = lastDSL?.site?.domain
     || (lastDSL?.site?.name || "website").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
-  const filename = siteName.endsWith(".ch") || siteName.endsWith(".com") ? siteName : siteName + ".html"
+  const filename = siteName.replace(/\.[a-z]{2,}$/i, "") + ".html"
   const blob = new Blob([lastHTML], { type: "text/html" })
   const a    = Object.assign(document.createElement("a"), {
     href: URL.createObjectURL(blob), download: filename
