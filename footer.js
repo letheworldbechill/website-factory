@@ -2,7 +2,7 @@
  * patterns/footer.js
  */
 
-import { esc, escUrl } from "../engine/escape.js"
+import { esc, escUrl } from "./escape.js"
 
 export function renderFooter(section, layout, config) {
   const d     = section.data || {}

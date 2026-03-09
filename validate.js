@@ -1,10 +1,10 @@
 /**
- * website-factory/schema/validate.js
+ * validate.js
  *
  * Schnell-Validator: prüft eine DSL-Datei gegen alle Schemas.
  * Kein Build-System nötig. Läuft direkt mit Node.js >= 18:
  *
- *   node schema/validate.js dsl/examples/landing-treuhand.json
+ *   node validate.js landing-treuhand.json
  */
 
 import { readFileSync } from "fs"
