@@ -1,42 +1,40 @@
 /**
- * preview/build-preview.mjs
- * node preview/build-preview.mjs
+ * build-preview.mjs
+ * node build-preview.mjs
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from "fs"
+import { readFileSync, writeFileSync } from "fs"
 import { fileURLToPath } from "url"
 import { dirname, join }  from "path"
 
 const __dir = dirname(fileURLToPath(import.meta.url))
-const root  = join(__dir, "..")
 
 // ── Engine-Bundle ─────────────────────────────────────────────────────────────
 
 const ENGINE_FILES = [
-  "engine/escape.js","engine/ids.js","engine/defaults.js","engine/graph.js",
-  "engine/parser.js","engine/pageComposer.js","engine/sectionComposer.js",
-  "engine/patternSelector.js","engine/layoutComposer.js",
-  "patterns/trust.js","patterns/process.js","patterns/testimonials.js",
-  "patterns/faq.js","patterns/cta.js","patterns/footer.js",
-  "patterns/hero.js","patterns/text.js","patterns/cards.js",
-  "engine/validator.js","engine/renderer.js","design/themeCompiler.js","engine/compiler.js",
+  "escape.js","ids.js","defaults.js","graph.js",
+  "parser.js","pageComposer.js","sectionComposer.js",
+  "patternSelector.js","layoutComposer.js",
+  "trust.js","process.js","testimonials.js",
+  "faq.js","cta.js","footer.js",
+  "hero.js","text.js","cards.js",
+  "validator.js","renderer.js","themeCompiler.js","compiler.js",
 ]
 
 let engineBundle = "// Website Factory Engine Bundle — auto-generated\n"
 for (const f of ENGINE_FILES) {
-  let src = readFileSync(join(root, f), "utf8")
+  let src = readFileSync(join(__dir, f), "utf8")
   src = src.replace(/^import\s+\{[^}]+\}\s+from\s+['"]\.\.?\/[^'"]+['"]\s*;?\n/gm, "")
   engineBundle += src.trim() + "\n\n"
 }
 
-const exampleDSL = readFileSync(join(root, "dsl/examples/landing-treuhand.json"), "utf8")
+const exampleDSL = readFileSync(join(__dir, "landing-treuhand.json"), "utf8")
 
 // ── Build ──────────────────────────────────────────────────────────────────────
 
 const html = buildHTML(engineBundle, exampleDSL)
-mkdirSync(join(root, "preview"), { recursive: true })
-writeFileSync(join(root, "preview/index.html"), html)
-console.log("✅ preview/index.html geschrieben —", html.length, "chars")
+writeFileSync(join(__dir, "index.html"), html)
+console.log("✅ index.html geschrieben —", html.length, "chars")
 
 // ── HTML ───────────────────────────────────────────────────────────────────────
 

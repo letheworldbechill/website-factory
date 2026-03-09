@@ -2,7 +2,7 @@
  * patterns/faq.js
  */
 
-import { esc } from "../engine/escape.js"
+import { esc } from "./escape.js"
 
 export function renderFaq(section, layout) {
   const d     = section.data  || {}

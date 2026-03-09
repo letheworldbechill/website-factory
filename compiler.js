@@ -19,7 +19,7 @@ import { validateDSL }      from "./validator.js"
 import { composePage }      from "./pageComposer.js"
 import { composeSections }  from "./sectionComposer.js"
 import { renderSection }    from "./renderer.js"
-import { compileTheme }     from "../design/themeCompiler.js"
+import { compileTheme }     from "./themeCompiler.js"
 import { esc }              from "./escape.js"
 
 /**

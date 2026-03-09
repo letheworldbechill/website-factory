@@ -8,15 +8,15 @@
 import { selectPattern }   from "./patternSelector.js"
 import { composeLayout }   from "./layoutComposer.js"
 
-import { renderHero }         from "../patterns/hero.js"
-import { renderText }         from "../patterns/text.js"
-import { renderCards }        from "../patterns/cards.js"
-import { renderFaq }          from "../patterns/faq.js"
-import { renderCta }          from "../patterns/cta.js"
-import { renderTrust }        from "../patterns/trust.js"
-import { renderProcess }      from "../patterns/process.js"
-import { renderTestimonials } from "../patterns/testimonials.js"
-import { renderFooter }       from "../patterns/footer.js"
+import { renderHero }         from "./hero.js"
+import { renderText }         from "./text.js"
+import { renderCards }        from "./cards.js"
+import { renderFaq }          from "./faq.js"
+import { renderCta }          from "./cta.js"
+import { renderTrust }        from "./trust.js"
+import { renderProcess }      from "./process.js"
+import { renderTestimonials } from "./testimonials.js"
+import { renderFooter }       from "./footer.js"
 
 // Pattern → Render-Funktion
 const RENDER_MAP = {
