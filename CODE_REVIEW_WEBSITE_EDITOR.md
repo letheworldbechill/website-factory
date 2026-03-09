@@ -1,173 +1,69 @@
-# Minimal Builder v5 – Review & Refactor-Plan zum soliden Produkt
+# Code Review – Website Editor (`index.html`)
 
-## Zielbild
-Aus dem aktuellen „Minimal Builder“ soll ein **zuverlässiges, wartbares und release-fähiges Produkt** werden – mit klarer Architektur, Testbarkeit, Sicherheit und planbarer Weiterentwicklung.
+## Scope
+Review des Editors mit Fokus auf **Performance**, **Security**, **Maintainability** und **Deployment-Risiken**.
 
----
+## Executive Summary
+Der Editor ist funktional umfangreich, hat aber ein paar strukturelle Risiken für produktive Nutzung:
 
-## 1) Kurzreview des aktuellen Stands
-
-### Stärken
-- Funktionsdichte ist hoch: Editor, Vorschau und Export sind bereits integriert.
-- Gute UX-Basics vorhanden (z. B. Accessibility-Hinweise, Motion-Reduktion, visuelle Tokens).
-- Produktgedanke ist klar erkennbar (Website-Builder mit Export-Pipeline).
-
-### Hauptrisiken (für „solides Produkt“)
-1. **Monolithische Single-File-Architektur**
-   - Sehr großes `index.html` mit Styles, React-Komponenten, Business-Logik und Export-Code.
-   - Hohe Änderungsrisiken, geringe Wiederverwendbarkeit, schwer testbar.
-2. **Runtime-Transpilation im Browser**
-   - `@babel/standalone` + `text/babel` erhöhen Startzeit und CPU-Last.
-3. **Security/Delivery-Risiken über CDN-Setup**
-   - Mehrere externe Skripte; für Produktionshärte fehlen harte Build-/Supply-Chain-Gates.
-4. **Unklare Layering-Grenzen**
-   - UI, Domain, Template-Logik und Export sind stark gekoppelt.
-5. **Fehlende Produkt-Guardrails**
-   - Keine klaren Qualitätsgates (CI, Tests, Release-Checklisten, Migrationsregeln).
+1. **Hohe Initial-Load-Kosten** durch Laufzeit-Transpilation mit Babel im Browser.
+2. **Supply-Chain-Risiko** durch externe CDN-Skripte ohne Subresource Integrity (SRI).
+3. **PWA/Deployment-Risiko** durch Service-Worker-Registrierung ohne klare Versionierungs-/Update-Strategie.
+4. **Wartbarkeit** leidet stark durch die große Single-File-Architektur.
 
 ---
 
-## 2) Refactor-Zielarchitektur (v5)
+## Findings
 
-### Architekturprinzipien
-- **Trennung nach Verantwortung**: `app/ui`, `domain`, `rendering`, `export`, `infra`.
-- **Unidirektionaler Datenfluss**: Zustand → Rendering/Preview → Export.
-- **Schema-first Datenmodell**: Zentrale Validierung (z. B. Zod/JSON-Schema).
-- **Deterministischer Export**: Gleiche Eingabe = identischer Output.
-- **Design-System als API**: Tokens + Spacing/Layout-Regeln als zentrale Quelle.
+### 1) Runtime-Transpilation im Browser (High)
+**Beobachtung:** Babel Standalone wird direkt im Browser geladen und mehrere Blöcke mit `type="text/babel"` werden zur Laufzeit transpiliert.  
+**Risiko:** Langsamer Startup, höherer CPU-Bedarf auf schwächeren Geräten, schlechtere Caching- und Debugging-Eigenschaften.
 
-### Vorgeschlagene Struktur
-```txt
-src/
-  app/
-    bootstrap.tsx
-    routes/
-  ui/
-    components/
-    panels/
-    primitives/
-  domain/
-    model/
-    actions/
-    validation/
-  rendering/
-    preview/
-    templates/
-  export/
-    html/
-    assets/
-    validators/
-  infra/
-    persistence/
-    analytics/
-    service-worker/
-  styles/
-    tokens/
-    themes/
-    global.css
-tests/
-  unit/
-  integration/
-  e2e/
-```
+**Evidenz:** `@babel/standalone` sowie mehrere `text/babel`-Skripte.  
 
----
+**Empfehlung:** Build-Step (z. B. Vite/esbuild) einführen und statisch gebaute JS-Bundles ausliefern.
 
-## 3) Umsetzungsplan in 5 Phasen
+### 2) Externe Skripte ohne SRI (High)
+**Beobachtung:** React, ReactDOM, Babel, JSZip und FileSaver werden von CDNs geladen, aber ohne `integrity`-Attribute.
+**Risiko:** Bei kompromittiertem CDN/Dependency kann schädlicher Code unbemerkt geladen werden.
 
-## Phase 0 – Stabilisieren & Baseline (1–2 Wochen)
-**Ziel:** Messbar machen, bevor umgebaut wird.
+**Evidenz:** `<script src="https://...">` mit `crossorigin`, jedoch ohne `integrity`.
 
-- Build-Tooling aufsetzen (Vite o. ä.), ohne Feature-Änderungen.
-- Linting/Formatting strikt aktivieren.
-- Baseline-Metriken erfassen:
-  - Bundlegröße
-  - First Load / Time to Interactive
-  - Export-Dauer
-  - Error-Rate im Browser
-- „Golden Files“ für Export erzeugen (Referenz-Outputs).
+**Empfehlung:**
+- Feste, gepinnte Versionen mit SRI verwenden.
+- Kritische Libraries möglichst selbst hosten.
+- CSP-Header ergänzen (mindestens `script-src` restriktiv).
 
-**Abnahmekriterien**
-- Reproduzierbarer Build lokal + CI.
-- Baseline-Dashboard/Markdown mit Metriken vorhanden.
+### 3) Service Worker Registrierung ohne Update-Konzept (Medium)
+**Beobachtung:** Service Worker wird auf HTTP(S) direkt registriert (`./sw.js`), aber im Dokument ist keine begleitende Strategie für Versionierung, Rollback oder Cache-Busting erkennbar.
+**Risiko:** Stale Caches, schwer nachvollziehbare Produktionsfehler nach Deployments.
 
-## Phase 1 – Entkoppeln der Kernlogik (2–3 Wochen)
-**Ziel:** Risiko aus dem Monolithen nehmen.
+**Evidenz:** Direkte Registrierung von `./sw.js`.
 
-- Domain-Modell extrahieren (`Project`, `Page`, `Section`, `Theme`, `Asset`).
-- Alle State-Transitions in Actions/Reducer kapseln.
-- Preview-Renderer von Editor-UI trennen.
-- Export-Pipeline als separates Modul isolieren.
+**Empfehlung:**
+- Versionierte Cache-Namen im SW.
+- Aktiv gesteuertes Update-Handling (`skipWaiting`/`clientsClaim` mit UX-Flow).
+- Deployment-Checkliste für SW-Invalidation.
 
-**Abnahmekriterien**
-- Kern-Use-Cases laufen ohne direkte DOM-Kopplung.
-- Erste Unit-Tests für Domain + Export grün.
+### 4) Monolithische Single-File-Struktur (Medium)
+**Beobachtung:** Sehr große HTML-Datei mit umfangreichem CSS + JS + React-Komponenten in einem Dokument.
+**Risiko:** Hohe Komplexität bei Änderungen, schwierigeres Testen/Reviewen, erhöhte Regression-Gefahr.
 
-## Phase 2 – Produktqualität & Sicherheit (1–2 Wochen)
-**Ziel:** Produktionshärte.
+**Evidenz:** Styling, Utilities, Komponenten und Bootstrap liegen im selben Dokument.
 
-- Externe Skripte durch gebaute Bundles ersetzen.
-- CSP-Konzept + Dependency-Pinning + Security-Scan in CI.
-- Service-Worker-Strategie: Versionierung, Update-UX, Rollback.
-- Error-Boundaries + Telemetrie für kritische Pfade.
-
-**Abnahmekriterien**
-- Security-Checks in CI verpflichtend.
-- SW-Update-Flow dokumentiert und getestet.
-
-## Phase 3 – UX-Systematisierung (2 Wochen)
-**Ziel:** Konsistenz und Skalierbarkeit im Editor.
-
-- Komponentenbibliothek mit klaren API-Kontrakten.
-- Spacing/Layout-System aus Dokumentation technisch verankern.
-- Theming vereinheitlichen (Dark/Light + Export-Theme-Kompatibilität).
-- Accessibility-Regressionstests (Keyboard, Fokus, Kontrast).
-
-**Abnahmekriterien**
-- Design-Tokens sind Single Source of Truth.
-- A11y-Smoke-Tests in CI vorhanden.
-
-## Phase 4 – Release-Readiness (1 Woche)
-**Ziel:** Betriebssicheres Produkt.
-
-- SemVer + Changelog + Migrationsnotes.
-- Smoke-E2E für Kern-Workflows:
-  - Projekt anlegen
-  - Abschnitt bearbeiten
-  - Vorschau prüfen
-  - Export + ZIP validieren
-- Release-Checkliste + Incident-Runbook.
-
-**Abnahmekriterien**
-- Wiederholbarer Release-Prozess.
-- Kern-Workflows stabil in E2E.
+**Empfehlung:**
+- Modularisieren: `styles/`, `components/`, `core/`, `export/`.
+- Kleine, klar abgegrenzte Module mit Unit-Tests.
+- Optional TypeScript für robustere Refactors.
 
 ---
 
-## 4) Priorisierte Backlog-Epics
-1. **E1 – Build-System & Modulstruktur**
-2. **E2 – Domain Model + Validation Layer**
-3. **E3 – Export Engine Hardening**
-4. **E4 – UI-Komponentenbibliothek**
-5. **E5 – Security & Compliance Guardrails**
-6. **E6 – Observability & Error Monitoring**
+## Positiv aufgefallen
+- Accessibility-Basics wie `:focus-visible` und `prefers-reduced-motion` sind berücksichtigt.
+- Zusätzliche Safety/Validation-Hilfen sind vorhanden (z. B. Error-Overlay, ExportValidator).
 
----
-
-## 5) KPIs für „solides Produkt“
-- **Performance:** Initial Load < 2.5s (Median Zielgerät)
-- **Stabilität:** < 1% Session Error Rate in kritischen Flows
-- **Qualität:** 80%+ Abdeckung für Domain/Export-Module
-- **Delivery:** Jeder Merge läuft durch CI-Quality-Gates
-- **UX:** Keine Blocker in Keyboard/A11y-Smoke-Tests
-
----
-
-## 6) Minimaler Start ab morgen (konkrete Tasks)
-1. Projekt auf Vite migrieren (ohne Feature-Änderung).
-2. `src/domain` anlegen und Datenschema aus aktuellem State ableiten.
-3. Export-Funktionen in `src/export` extrahieren.
-4. 3 Golden-File-Tests für HTML-Export einführen.
-5. CI mit Lint + Unit + Export-Tests verpflichtend machen.
-
-Damit entsteht eine **inkrementelle Refactor-Route**: schnellere Deploys, weniger Regressionen, klarere Ownership und bessere Basis für v5-Features.
+## Priorisierte Next Steps
+1. **Build-Pipeline statt Browser-Babel**.
+2. **SRI + pinned dependencies + CSP**.
+3. **Service-Worker-Update-Strategie** dokumentieren und technisch absichern.
+4. **Schrittweise Modularisierung** (zuerst Utilities + Komponenten trennen).

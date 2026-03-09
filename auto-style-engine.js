@@ -1,244 +1,298 @@
-# Smooth Builder – Spacing- & Layout-System
+/**
+ * Smooth Builder Auto Style Engine
+ * Deterministic, dependency-free rule engine for deriving style settings.
+ */
 
-**Implementierungsdokumentation (direkt umsetzbar)**
-
-Ziel dieses Dokuments: Du bekommst einen klaren, technischen Migrationspfad, damit **Builder UI, Preview und Export HTML** dieselben Spacing-Proportionen nutzen.
-
----
-
-## 1) Zielarchitektur
-
-Das System soll überall dieselbe Token-Quelle verwenden:
-
-1. `Design Tokens`
-2. `Component Styles`
-3. `Builder Preview`
-4. `Export (tokens.css/components.css/index.html)`
-
-**Regel:** Keine eigenen Spacing-Skalen pro Schicht mehr. Es gibt nur **eine** Ladder + **eine** Dichte-Skalierung.
-
----
-
-## 2) Neues Spacing-System (8px + Fibonacci)
-
-### 2.1 Kernidee
-
-- Basiseinheit: `8px`
-- Wachstum: Fibonacci-nahe Sprünge
-- Vorteil: konsistente Rhythmik, bessere visuelle Hierarchie auf Landingpages
-
-### 2.2 Verbindliche Ladder
-
-```css
-:root {
-  --sp-scale: 1;
-
-  --sp-1: calc(0.5rem * var(--sp-scale));     /* 8px */
-  --sp-2: calc(0.8125rem * var(--sp-scale));  /* 13px */
-  --sp-3: calc(1.3125rem * var(--sp-scale));  /* 21px */
-  --sp-4: calc(2.125rem * var(--sp-scale));   /* 34px */
-  --sp-5: calc(3.4375rem * var(--sp-scale));  /* 55px */
-  --sp-6: calc(5.5625rem * var(--sp-scale));  /* 89px */
-  --sp-7: calc(9rem * var(--sp-scale));       /* 144px */
-}
-```
-
-### 2.3 Dichte-Modi
-
-```css
-[data-density="compact"]  { --sp-scale: 0.8; }
-[data-density="balanced"] { --sp-scale: 1; }
-[data-density="airy"]     { --sp-scale: 1.25; }
-```
-
-> Empfehlung: `balanced` als Default setzen.
-
----
-
-## 3) Typografie an `--sp-scale` koppeln
-
-Behalte `clamp(...)` bei, aber skaliere konsistent:
-
-```css
-:root {
-  --text-xs: clamp(calc(0.75rem * var(--sp-scale)), 1vw, calc(0.8rem * var(--sp-scale)));
-  --text-sm: clamp(calc(0.875rem * var(--sp-scale)), 1.2vw, calc(0.95rem * var(--sp-scale)));
-  --text-base: clamp(calc(1rem * var(--sp-scale)), 1.4vw, calc(1.05rem * var(--sp-scale)));
-  --text-lg: clamp(calc(1.125rem * var(--sp-scale)), 1.8vw, calc(1.25rem * var(--sp-scale)));
-  --text-xl: clamp(calc(1.25rem * var(--sp-scale)), 2vw, calc(1.5rem * var(--sp-scale)));
-}
-```
-
-Damit bleibt die Lesbarkeit über Density-Modi stabil.
-
----
-
-## 4) Vertikaler Rhythmus für Sections
-
-Definiere globale Section-Abstände:
-
-```css
-:root {
-  --section-space-sm: var(--sp-4);
-  --section-space-md: var(--sp-5);
-  --section-space-lg: var(--sp-6);
-  --section-space-xl: var(--sp-7);
-}
-
-.section {
-  padding-block: var(--section-space-lg);
-}
-
-.hero {
-  padding-block: var(--section-space-xl);
-}
-
-.trust {
-  padding-block: var(--section-space-sm);
-}
-```
-
----
-
-## 5) Container- und Grid-Standard
-
-### 5.1 Container
-
-```css
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin-inline: auto;
-  padding-inline: var(--sp-3);
-}
-```
-
-Optional für große Layouts: `max-width: 1280px;`
-
-### 5.2 Grid
-
-```css
-.grid-12 {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: var(--sp-3);
-}
-
-.hero-grid {
-  display: grid;
-  grid-template-columns: 7fr 5fr;
-  gap: var(--sp-5);
-}
-
-@media (max-width: 900px) {
-  .hero-grid {
-    grid-template-columns: 1fr;
-    gap: var(--sp-4);
+const INDUSTRY_POLICIES = {
+  anwalt: {
+    preset: 'editorial',
+    fontStack: 'serif',
+    darkMode: false,
+    densityDefault: 'airy',
+    fx: { orbs: false, glass: false, grain: true, intensity: 'subtle' }
+  },
+  kanzlei: {
+    preset: 'editorial',
+    fontStack: 'serif',
+    darkMode: false,
+    densityDefault: 'airy',
+    fx: { orbs: false, glass: false, grain: true, intensity: 'subtle' }
+  },
+  treuhand: {
+    preset: 'swiss',
+    fontStack: 'instrument',
+    darkMode: false,
+    densityDefault: 'balanced',
+    fx: { orbs: false, glass: false, grain: false, intensity: 'subtle' }
+  },
+  finanzberatung: {
+    preset: 'swiss',
+    fontStack: 'instrument',
+    darkMode: false,
+    densityDefault: 'balanced',
+    fx: { orbs: false, glass: false, grain: false, intensity: 'subtle' }
+  },
+  it: {
+    preset: 'glass',
+    fontStack: 'inter',
+    darkMode: true,
+    densityDefault: 'balanced',
+    fx: { orbs: true, glass: true, grain: true, intensity: 'medium' }
+  },
+  saas: {
+    preset: 'glass',
+    fontStack: 'inter',
+    darkMode: true,
+    densityDefault: 'balanced',
+    fx: { orbs: true, glass: true, grain: true, intensity: 'medium' }
+  },
+  fitness: {
+    preset: 'signature',
+    fontStack: 'dmsans',
+    darkMode: false,
+    densityDefault: 'balanced',
+    fx: { orbs: true, glass: false, grain: false, intensity: 'medium' }
+  },
+  gastro: {
+    preset: 'editorial',
+    fontStack: 'serif',
+    darkMode: false,
+    densityDefault: 'airy',
+    fx: { orbs: false, glass: false, grain: true, intensity: 'subtle' }
+  },
+  restaurant: {
+    preset: 'editorial',
+    fontStack: 'serif',
+    darkMode: false,
+    densityDefault: 'airy',
+    fx: { orbs: false, glass: false, grain: true, intensity: 'subtle' }
   }
-}
-```
+};
 
----
+const DEFAULT_POLICY = {
+  preset: 'swiss',
+  fontStack: 'instrument',
+  darkMode: false,
+  densityDefault: 'balanced',
+  fx: { orbs: false, glass: false, grain: false, intensity: 'subtle' }
+};
 
-## 6) Komponentenregeln (verbindlich)
+const FALLBACK_PALETTE = [
+  { primary: '#1e3a5f', accent: '#ca8a04' },
+  { primary: '#0f766e', accent: '#f59e0b' },
+  { primary: '#1d4ed8', accent: '#14b8a6' }
+];
 
-```css
-.card {
-  padding: var(--sp-4);
-  border-radius: 14px;
-}
-
-.btn {
-  padding: calc(var(--sp-2) * 0.75) var(--sp-3);
-}
-
-.section-header {
-  margin-bottom: var(--sp-5);
-}
-```
-
-Wichtig: Alle Komponenten nutzen nur `--sp-*` und `--section-space-*`.
-
----
-
-## 7) Export-Konsistenz (kritischer Punkt)
-
-Der Export darf **keine eigene Spacing-Skala** enthalten.
-
-### Pflicht für Export-Pipeline
-
-1. `tokens.css` wird aus exakt derselben Token-Quelle erzeugt wie die Preview.
-2. `components.css` enthält keine harten Pixelwerte für Margins/Paddings (außer Radius/Border-Sonderfälle).
-3. `index.html` referenziert nur die exportierten Token-Dateien.
-
-### Akzeptanzkriterium
-
-- Bei gleichem Datensatz + gleichem `density` müssen Preview und Export visuell deckungsgleich sein (Toleranz max. 1px durch Browser-Rounding).
-
----
-
-## 8) Services-Grid Fix (Desktop)
-
-Wenn aktuell nur 1 Spalte aktiv ist, ergänze:
-
-```css
-.services__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-4);
-}
-
-@media (min-width: 900px) {
-  .services__grid {
-    grid-template-columns: repeat(3, 1fr);
+function normalizeHex(hex) {
+  if (typeof hex !== 'string') return null;
+  const raw = hex.trim().replace('#', '');
+  if (/^[0-9a-fA-F]{3}$/.test(raw)) {
+    return `#${raw.split('').map((ch) => ch + ch).join('').toLowerCase()}`;
   }
+  if (/^[0-9a-fA-F]{6}$/.test(raw)) return `#${raw.toLowerCase()}`;
+  return null;
 }
-```
 
----
+function hexToRgb(hex) {
+  const n = normalizeHex(hex);
+  if (!n) return null;
+  const v = n.slice(1);
+  return {
+    r: Number.parseInt(v.slice(0, 2), 16),
+    g: Number.parseInt(v.slice(2, 4), 16),
+    b: Number.parseInt(v.slice(4, 6), 16)
+  };
+}
 
-## 9) Migrationsplan (in Reihenfolge umsetzen)
+function luminance(rgb) {
+  if (!rgb) return Number.NaN;
+  return 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+}
 
-1. **Token-Quelle umstellen**
-   - Alte 4px-Ladder entfernen.
-   - Neue Fibonacci-Ladder + `--sp-scale` setzen.
-2. **Density-Mapping vereinheitlichen**
-   - `compact/balanced/airy` überall identisch abbilden.
-3. **Komponenten migrieren**
-   - Alle Spacing-Hardcodes (`px/rem`) auf `--sp-*`/`--section-space-*` umstellen.
-4. **Export-Generator angleichen**
-   - Export-Tokens aus derselben Quelle wie Preview erzeugen.
-5. **Regression-Check**
-   - Vorher/Nachher-Screens mit denselben Daten vergleichen.
+function isNearBlack(y) { return y < 20; }
+function isNearWhite(y) { return y > 235; }
 
----
+function estimateAverageTextLength(components) {
+  const values = [];
 
-## 10) Definition of Done (DoD)
+  function visit(node) {
+    if (typeof node === 'string') {
+      const trimmed = node.trim();
+      if (trimmed) values.push(trimmed.length);
+      return;
+    }
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
+    if (node && typeof node === 'object') {
+      Object.values(node).forEach(visit);
+    }
+  }
 
-Eine Implementierung gilt als abgeschlossen, wenn:
+  visit(components);
+  if (!values.length) return 0;
+  return Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+}
 
-- [ ] Es gibt nur noch **eine** Spacing-Ladder im gesamten System.
-- [ ] Density beeinflusst Preview und Export gleich.
-- [ ] Komponenten verwenden ausschließlich Spacing-Tokens.
-- [ ] Services-Grid ist ab `900px` 3-spaltig.
-- [ ] Snapshot-Test „Preview vs Export“ besteht.
+function computeContentStats(components = {}) {
+  return {
+    servicesCount: components?.services?.items?.length ?? 0,
+    benefitsCount: components?.benefits?.items?.length ?? 0,
+    faqCount: components?.faq?.items?.length ?? 0,
+    testimonialsCount: components?.testimonials?.items?.length ?? 0,
+    hasProofTable: Boolean(components?.proofTable?.enabled),
+    hasProcess: Boolean(components?.process?.enabled),
+    hasGallery: Boolean(components?.gallery?.enabled),
+    heroSubtitleLength: (components?.hero?.subtitle ?? '').length,
+    avgTextLength: estimateAverageTextLength(components)
+  };
+}
 
----
+function decideDensity(stats, industryKey, fallback = 'balanced') {
+  const totalCards = (stats?.servicesCount ?? 0) + (stats?.benefitsCount ?? 0) + (stats?.faqCount ?? 0);
+  const key = String(industryKey || '').toLowerCase();
 
-## 11) QA-Checkliste
+  if (stats?.hasProofTable && stats?.hasProcess && totalCards >= 12) return 'compact';
+  if (['anwalt', 'treuhand', 'finanzberatung', 'kanzlei'].includes(key) && (stats?.avgTextLength ?? 0) > 220) return 'airy';
+  if ((stats?.heroSubtitleLength ?? 0) > 180 && totalCards < 8) return 'airy';
 
-- [ ] `compact`: Layout bleibt dicht, aber lesbar.
-- [ ] `balanced`: Standard-Layout wirkt neutral.
-- [ ] `airy`: Mehr Weißraum ohne visuelle Brüche.
-- [ ] Hero-Abstand deutlich größer als Trust-Bar.
-- [ ] Buttons, Cards, Section-Header behalten Proportionen über alle Dichten.
+  return fallback;
+}
 
----
+function applyAggressiveness(policy, mode) {
+  if (mode === 'conservative') {
+    return {
+      ...policy,
+      preset: policy.preset === 'glass' ? 'swiss' : policy.preset,
+      fx: { ...policy.fx, orbs: false, glass: false, intensity: 'subtle' }
+    };
+  }
+  if (mode === 'bold') {
+    return {
+      ...policy,
+      preset: policy.preset === 'swiss' ? 'glass' : policy.preset,
+      fx: { ...policy.fx, orbs: true, grain: true, intensity: policy.fx?.intensity ?? 'medium' }
+    };
+  }
+  return policy;
+}
 
-## 12) Optionaler nächster Schritt
+function buildIndustryPolicy(industryKey, aggressiveness = 'balanced') {
+  const key = String(industryKey || '').toLowerCase();
+  const base = INDUSTRY_POLICIES[key] || DEFAULT_POLICY;
+  return applyAggressiveness(base, aggressiveness);
+}
 
-Wenn die Token-Konsistenz steht, kannst du als nächstes ein **automatisches Layout-Patterning** einbauen:
+function isAmberGold(hex) {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return false;
+  // Warm highlight bucket
+  return rgb.r > 160 && rgb.g > 100 && rgb.b < 90;
+}
 
-`Header → Hero → Trust → Services → Benefits → Testimonials → FAQ → CTA → Footer`
+function pickPrimaryAccent(logoColors = [], industryKey = '') {
+  const candidates = logoColors
+    .map((hex) => ({ hex: normalizeHex(hex), y: luminance(hexToRgb(hex)) }))
+    .filter((c) => c.hex && Number.isFinite(c.y));
 
-Das verbessert die Qualität der generierten Landingpages stark, ohne manuelles Fine-Tuning.
+  if (!candidates.length) return { primary: null, accent: null };
+
+  const usableDark = candidates
+    .filter((c) => !isNearBlack(c.y))
+    .sort((a, b) => a.y - b.y);
+
+  const usableLight = candidates
+    .filter((c) => !isNearWhite(c.y))
+    .sort((a, b) => b.y - a.y);
+
+  const primary = (usableDark[0] || candidates.sort((a, b) => a.y - b.y)[0]).hex;
+
+  const key = String(industryKey || '').toLowerCase();
+  const wantsWarmAccent = ['anwalt', 'kanzlei', 'gastro', 'restaurant'].includes(key);
+
+  let accentCandidate = null;
+  if (wantsWarmAccent) {
+    accentCandidate = usableLight.find((c) => isAmberGold(c.hex)) || null;
+  }
+
+  const accent = (accentCandidate || usableLight[0] || candidates.sort((a, b) => b.y - a.y)[0]).hex;
+
+  if (accent === primary) {
+    const different = candidates.find((c) => c.hex !== primary);
+    return { primary, accent: different ? different.hex : primary };
+  }
+
+  return { primary, accent };
+}
+
+function getIndustryColorFallback(industryKey) {
+  const key = String(industryKey || '').toLowerCase();
+
+  if (['anwalt', 'kanzlei', 'treuhand', 'finanzberatung'].includes(key)) return FALLBACK_PALETTE[0];
+  if (['it', 'saas'].includes(key)) return FALLBACK_PALETTE[2];
+  if (['gastro', 'restaurant'].includes(key)) return FALLBACK_PALETTE[1];
+  return FALLBACK_PALETTE[0];
+}
+
+function autoStyleEngine(settings = {}, context = {}) {
+  const next = JSON.parse(JSON.stringify(settings || {}));
+  const locks = context.locks || {};
+  const industryKey = context.industryKey || next.industry || '';
+  const policy = buildIndustryPolicy(industryKey, context.aggressiveness || 'balanced');
+  const stats = context.contentStats || computeContentStats(context.components || {});
+
+  if (!locks.preset) next.stylePreset = policy.preset;
+  if (!locks.typography) next.fontStack = policy.fontStack;
+  if (!locks.density) next.designDensity = decideDensity(stats, industryKey, policy.densityDefault);
+
+  if (!locks.fx) {
+    next.darkMode = policy.darkMode;
+    next.fxOrbs = policy.fx.orbs;
+    next.fxGlass = policy.fx.glass;
+    next.fxGrain = policy.fx.grain;
+    next.fxIntensity = policy.fx.intensity;
+  }
+
+  if (!locks.colors) {
+    if (next.useColorStack && next.colorStack) {
+      // keep user-decided stack
+    } else if (context.colorStack && context.acceptColorStack !== false) {
+      next.colorStack = context.colorStack;
+      next.useColorStack = true;
+    } else {
+      const { primary, accent } = pickPrimaryAccent(context.logoColors || [], industryKey);
+      if (primary && accent) {
+        next.primaryColor = primary;
+        next.accentColor = accent;
+      } else {
+        const fallback = getIndustryColorFallback(industryKey);
+        next.primaryColor = fallback.primary;
+        next.accentColor = fallback.accent;
+      }
+    }
+  }
+
+  return next;
+}
+
+const api = {
+  INDUSTRY_POLICIES,
+  autoStyleEngine,
+  computeContentStats,
+  pickPrimaryAccent,
+  buildIndustryPolicy,
+  decideDensity,
+  getIndustryColorFallback,
+  normalizeHex,
+  hexToRgb,
+  luminance
+};
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = api;
+}
+
+if (typeof window !== 'undefined') {
+  window.AutoStyleEngine = api;
+}
