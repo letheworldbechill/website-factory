@@ -2,7 +2,7 @@
  * patterns/cards.js — 2–4 Items als Karten
  */
 
-import { esc, escUrl } from "./escape.js"
+import { esc, escUrl } from "../engine/escape.js"
 
 export function renderCards(section, layout) {
   const d     = section.data  || {}

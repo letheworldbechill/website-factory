@@ -2,7 +2,7 @@
  * patterns/cta.js
  */
 
-import { esc, escUrl } from "./escape.js"
+import { esc, escUrl } from "../engine/escape.js"
 
 export function renderCta(section, layout) {
   const d     = section.data || {}

@@ -2,7 +2,7 @@
  * patterns/hero.js
  */
 
-import { esc, escUrl } from "./escape.js"
+import { esc, escUrl } from "../engine/escape.js"
 
 export function renderHero(section, layout) {
   const d       = section.data || {}

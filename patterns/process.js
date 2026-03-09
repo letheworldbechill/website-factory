@@ -2,7 +2,7 @@
  * patterns/process.js — Nummerierte Schritte
  */
 
-import { esc } from "./escape.js"
+import { esc } from "../engine/escape.js"
 
 export function renderProcess(section, layout) {
   const d     = section.data  || {}

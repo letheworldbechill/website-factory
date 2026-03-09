@@ -1,10 +1,10 @@
 /**
- * validate.js
+ * schema/validate.js
  *
  * Schnell-Validator: prüft eine DSL-Datei gegen alle Schemas.
  * Kein Build-System nötig. Läuft direkt mit Node.js >= 18:
  *
- *   node validate.js landing-treuhand.json
+ *   node schema/validate.js dsl/examples/landing-treuhand.json
  */
 
 import { readFileSync } from "fs"
@@ -155,7 +155,7 @@ function validate(schema, data, path = "#", rootSchema = null) {
 
 const inputFile = process.argv[2]
 if (!inputFile) {
-  console.error("Usage: node validate.js <dsl-file.json>")
+  console.error("Usage: node schema/validate.js <dsl-file.json>")
   process.exit(1)
 }
 

@@ -2,7 +2,7 @@
  * patterns/testimonials.js
  */
 
-import { esc } from "./escape.js"
+import { esc } from "../engine/escape.js"
 
 function stars(rating) {
   const n = Math.min(Math.max(Number(rating) || 5, 1), 5)
