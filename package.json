@@ -1,0 +1,10 @@
+{
+  "name": "website-factory",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zero-dependency, schema-driven static website generator",
+  "type": "module",
+  "scripts": {
+    "build": "node preview/build-preview.mjs"
+  }
+}
