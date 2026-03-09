@@ -64,7 +64,7 @@ function compilePage(page, config) {
 
   if (sections.length === 0) {
     const types = composePage(config.site)
-    sections = composeSections(types)
+    sections = composeSections(types, config.site.industry)
   }
 
   const body = sections
