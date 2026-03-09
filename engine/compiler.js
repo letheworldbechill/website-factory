@@ -19,7 +19,7 @@ import { validateDSL }      from "./validator.js"
 import { composePage }      from "./pageComposer.js"
 import { composeSections }  from "./sectionComposer.js"
 import { renderSection }    from "./renderer.js"
-import { compileTheme }     from "./themeCompiler.js"
+import { compileTheme }     from "../design/themeCompiler.js"
 import { esc }              from "./escape.js"
 
 /**
@@ -73,7 +73,7 @@ function compilePage(page, config) {
 
   const meta = compileMeta(page, config)
   const css  = compileTheme(config.theme)
-  const lang = config.site.language || "de"
+  const lang = esc(config.site.language || "de")
 
   return `<!DOCTYPE html>
 <html lang="${lang}">

@@ -2,7 +2,7 @@
  * patterns/text.js
  */
 
-import { esc } from "./escape.js"
+import { esc } from "../engine/escape.js"
 
 export function renderText(section, layout) {
   const d  = section.data || {}

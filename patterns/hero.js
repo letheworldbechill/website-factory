@@ -2,15 +2,16 @@
  * patterns/hero.js
  */
 
-import { esc, escUrl } from "./escape.js"
+import { esc, escUrl } from "../engine/escape.js"
 
 export function renderHero(section, layout) {
   const d       = section.data || {}
   const hasCols = layout.areaNames.length > 1
+  const bg      = esc(section.settings?.background   || "default")
   const ptClass = `section--pt-${esc(section.settings?.paddingTop  || "xl")}`
   const pbClass = `section--pb-${esc(section.settings?.paddingBottom || "xl")}`
 
-  return `<section class="section section--hero ${ptClass} ${pbClass}" id="${esc(section.id)}">
+  return `<section class="section section--hero bg--${bg} ${ptClass} ${pbClass}" id="${esc(section.id)}">
   <div class="container">
     <div class="${hasCols ? "layout-split" : "layout-stack"}"${hasCols ? ` style="${esc(layout.style)}"` : ""}>
       <div class="hero__content">

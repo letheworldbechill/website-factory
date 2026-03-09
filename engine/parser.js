@@ -98,7 +98,7 @@ function parseTheme(raw) {
 function parsePages(rawPages, site) {
   // Keine Pages angegeben → eine Standardseite erzeugen
   if (!rawPages || rawPages.length === 0) {
-    return [{ id: "home", kind: site.pageType || "landing", sections: [] }]
+    return [parsePage({ id: "home", kind: site.pageType || "landing" }, 0)]
   }
   return rawPages.map((raw, idx) => parsePage(raw, idx))
 }

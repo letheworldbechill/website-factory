@@ -1,6 +1,6 @@
 /**
- * build-preview.mjs
- * node build-preview.mjs
+ * preview/build-preview.mjs
+ * node preview/build-preview.mjs
  */
 
 import { readFileSync, writeFileSync } from "fs"
@@ -8,33 +8,34 @@ import { fileURLToPath } from "url"
 import { dirname, join }  from "path"
 
 const __dir = dirname(fileURLToPath(import.meta.url))
+const root  = join(__dir, "..")
 
 // ── Engine-Bundle ─────────────────────────────────────────────────────────────
 
 const ENGINE_FILES = [
-  "escape.js","ids.js","defaults.js","graph.js",
-  "parser.js","pageComposer.js","sectionComposer.js",
-  "patternSelector.js","layoutComposer.js",
-  "trust.js","process.js","testimonials.js",
-  "faq.js","cta.js","footer.js",
-  "hero.js","text.js","cards.js",
-  "validator.js","renderer.js","themeCompiler.js","compiler.js",
+  "engine/escape.js","engine/ids.js","engine/defaults.js","engine/graph.js",
+  "engine/parser.js","engine/pageComposer.js","engine/sectionComposer.js",
+  "engine/patternSelector.js","engine/layoutComposer.js",
+  "patterns/trust.js","patterns/process.js","patterns/testimonials.js",
+  "patterns/faq.js","patterns/cta.js","patterns/footer.js",
+  "patterns/hero.js","patterns/text.js","patterns/cards.js",
+  "engine/validator.js","engine/renderer.js","design/themeCompiler.js","engine/compiler.js",
 ]
 
 let engineBundle = "// Website Factory Engine Bundle — auto-generated\n"
 for (const f of ENGINE_FILES) {
-  let src = readFileSync(join(__dir, f), "utf8")
+  let src = readFileSync(join(root, f), "utf8")
   src = src.replace(/^import\s+\{[^}]+\}\s+from\s+['"]\.\.?\/[^'"]+['"]\s*;?\n/gm, "")
   engineBundle += src.trim() + "\n\n"
 }
 
-const exampleDSL = readFileSync(join(__dir, "landing-treuhand.json"), "utf8")
+const exampleDSL = readFileSync(join(root, "dsl/examples/landing-treuhand.json"), "utf8")
 
 // ── Build ──────────────────────────────────────────────────────────────────────
 
 const html = buildHTML(engineBundle, exampleDSL)
 writeFileSync(join(__dir, "index.html"), html)
-console.log("✅ index.html geschrieben —", html.length, "chars")
+console.log("✅ preview/index.html geschrieben —", html.length, "chars")
 
 // ── HTML ───────────────────────────────────────────────────────────────────────
 
@@ -397,11 +398,10 @@ let lastHTML       = ""
 let lastDSL        = null
 
 // ════════════════════════════════════════════════
-// INIT
+// INIT (deferred — see bottom of script)
 // ════════════════════════════════════════════════
 document.getElementById("dslEditor").value = JSON.stringify(EXAMPLE_DSL, null, 2)
 document.getElementById("dslEditor").addEventListener("input", () => { dslDirty = true })
-compile()
 
 // ════════════════════════════════════════════════
 // MODE SWITCH
@@ -427,14 +427,14 @@ window.setPreset = function(el) {
   document.querySelectorAll(".chip[data-preset]").forEach(c => c.classList.remove("active"))
   el.classList.add("active")
   currentPreset = el.dataset.preset
-  syncFromVisual()
+  window.syncFromVisual()
 }
 
 window.setComplexity = function(el) {
   document.querySelectorAll(".chip[data-c]").forEach(c => c.classList.remove("active"))
   el.classList.add("active")
   currentComplex = parseInt(el.dataset.c)
-  syncFromVisual()
+  window.syncFromVisual()
 }
 
 // ════════════════════════════════════════════════
@@ -508,7 +508,7 @@ window.syncFromVisual = function() {
     } catch(e) {}
   }
   clearTimeout(window._compileTimer)
-  window._compileTimer = setTimeout(compile, 150)
+  window._compileTimer = setTimeout(window.compile, 150)
 }
 
 // ════════════════════════════════════════════════
@@ -613,7 +613,7 @@ window.resetToExample = function() {
     c.classList.toggle("active", parseInt(c.dataset.c) === currentComplex)
   )
 
-  compile()
+  window.compile()
 }
 
 // ════════════════════════════════════════════════
@@ -622,9 +622,14 @@ window.resetToExample = function() {
 document.addEventListener("keydown", e => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
     e.preventDefault()
-    compile()
+    window.compile()
   }
 })
+
+// ════════════════════════════════════════════════
+// INIT — run first compile after all functions are defined
+// ════════════════════════════════════════════════
+window.compile()
 </script>
 
 </body>

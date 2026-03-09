@@ -661,7 +661,7 @@ function parseTheme(raw) {
 function parsePages(rawPages, site) {
   // Keine Pages angegeben → eine Standardseite erzeugen
   if (!rawPages || rawPages.length === 0) {
-    return [{ id: "home", kind: site.pageType || "landing", sections: [] }]
+    return [parsePage({ id: "home", kind: site.pageType || "landing" }, 0)]
   }
   return rawPages.map((raw, idx) => parsePage(raw, idx))
 }
@@ -1180,10 +1180,11 @@ export function renderFooter(section, layout, config) {
 export function renderHero(section, layout) {
   const d       = section.data || {}
   const hasCols = layout.areaNames.length > 1
+  const bg      = esc(section.settings?.background   || "default")
   const ptClass = `section--pt-${esc(section.settings?.paddingTop  || "xl")}`
   const pbClass = `section--pb-${esc(section.settings?.paddingBottom || "xl")}`
 
-  return `<section class="section section--hero ${ptClass} ${pbClass}" id="${esc(section.id)}">
+  return `<section class="section section--hero bg--${bg} ${ptClass} ${pbClass}" id="${esc(section.id)}">
   <div class="container">
     <div class="${hasCols ? "layout-split" : "layout-stack"}"${hasCols ? ` style="${esc(layout.style)}"` : ""}>
       <div class="hero__content">
@@ -1398,7 +1399,7 @@ export function renderSection(section, config = {}) {
 
   if (!fn) {
     console.warn(`renderer: Kein Renderer für Pattern '${pattern}' (Section '${section.id}')`)
-    return `<!-- section ${section.id} (${section.type}): kein Renderer -->`
+    return `<!-- section ${esc(section.id)} (${esc(section.type)}): kein Renderer -->`
   }
 
   return fn(section, layout, config)
@@ -1852,7 +1853,7 @@ function compilePage(page, config) {
 
   const meta = compileMeta(page, config)
   const css  = compileTheme(config.theme)
-  const lang = config.site.language || "de"
+  const lang = esc(config.site.language || "de")
 
   return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -2065,11 +2066,10 @@ let lastHTML       = ""
 let lastDSL        = null
 
 // ════════════════════════════════════════════════
-// INIT
+// INIT (deferred — see bottom of script)
 // ════════════════════════════════════════════════
 document.getElementById("dslEditor").value = JSON.stringify(EXAMPLE_DSL, null, 2)
 document.getElementById("dslEditor").addEventListener("input", () => { dslDirty = true })
-compile()
 
 // ════════════════════════════════════════════════
 // MODE SWITCH
@@ -2095,14 +2095,14 @@ window.setPreset = function(el) {
   document.querySelectorAll(".chip[data-preset]").forEach(c => c.classList.remove("active"))
   el.classList.add("active")
   currentPreset = el.dataset.preset
-  syncFromVisual()
+  window.syncFromVisual()
 }
 
 window.setComplexity = function(el) {
   document.querySelectorAll(".chip[data-c]").forEach(c => c.classList.remove("active"))
   el.classList.add("active")
   currentComplex = parseInt(el.dataset.c)
-  syncFromVisual()
+  window.syncFromVisual()
 }
 
 // ════════════════════════════════════════════════
@@ -2176,7 +2176,7 @@ window.syncFromVisual = function() {
     } catch(e) {}
   }
   clearTimeout(window._compileTimer)
-  window._compileTimer = setTimeout(compile, 150)
+  window._compileTimer = setTimeout(window.compile, 150)
 }
 
 // ════════════════════════════════════════════════
@@ -2204,13 +2204,9 @@ window.compile = function() {
     const ms   = (performance.now() - t0).toFixed(0)
     lastHTML   = html
 
-    const frame  = document.getElementById("previewFrame")
-    const blob   = new Blob([html], { type: "text/html; charset=utf-8" })
-    const blobUrl = URL.createObjectURL(blob)
-    // Alte Blob-URL freigeben bevor neue gesetzt wird
-    if (frame._blobUrl) URL.revokeObjectURL(frame._blobUrl)
-    frame._blobUrl = blobUrl
-    frame.src = blobUrl
+    const frame = document.getElementById("previewFrame")
+    const doc   = frame.contentDocument || frame.contentWindow.document
+    doc.open(); doc.write(html); doc.close()
 
     const domain = dsl.site?.domain
       || (dsl.site?.name || "preview").toLowerCase().replace(/\s+/g, "-") + ".ch"
@@ -2285,7 +2281,7 @@ window.resetToExample = function() {
     c.classList.toggle("active", parseInt(c.dataset.c) === currentComplex)
   )
 
-  compile()
+  window.compile()
 }
 
 // ════════════════════════════════════════════════
@@ -2294,9 +2290,14 @@ window.resetToExample = function() {
 document.addEventListener("keydown", e => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
     e.preventDefault()
-    compile()
+    window.compile()
   }
 })
+
+// ════════════════════════════════════════════════
+// INIT — run first compile after all functions are defined
+// ════════════════════════════════════════════════
+window.compile()
 </script>
 
 </body>
