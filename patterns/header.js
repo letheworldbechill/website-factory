@@ -57,6 +57,7 @@ function resolveNavItems(section, config) {
 function deriveInitials(name) {
   if (!name) return "?"
   const words = name.trim().split(/\s+/).filter(w => !/^(AG|GmbH|SA|Ltd|Inc|Co|KG)$/i.test(w))
+  if (words.length === 0) return "?"
   return words.slice(0, 2).map(w => w[0].toUpperCase()).join("")
 }
 
@@ -185,6 +186,7 @@ export function compileHeaderScript() {
   document.querySelectorAll('a[href^="#"]').forEach(function(a){
     a.addEventListener('click', function(e){
       var id = this.getAttribute('href').slice(1);
+      if (!id) return;
       var el = document.getElementById(id);
       if (!el) return;
       e.preventDefault();

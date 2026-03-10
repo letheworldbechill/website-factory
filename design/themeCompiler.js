@@ -387,7 +387,7 @@ export function compileTheme(theme) {
 .site-header--dark .site-header__nav-link:hover { color: #fff; }
 .site-header--dark .site-header__toggle span { background: #f5f5f5; }
 
-.site-header__inner { display: flex; align-items: center; justify-content: space-between; height: 100%; }
+.site-header__inner { display: flex; align-items: center; justify-content: space-between; height: 100%; position: relative; z-index: 2; }
 .site-header__brand { display: flex; align-items: center; gap: var(--sp-3); flex-shrink: 0; text-decoration: none; }
 .site-header__logo { width: 42px; height: 42px; border-radius: 50%; background: var(--c-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--fs-sm); overflow: hidden; flex-shrink: 0; }
 .site-header__logo-img { width: 100%; height: 100%; object-fit: cover; }
