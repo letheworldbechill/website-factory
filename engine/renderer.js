@@ -18,6 +18,7 @@ import { renderTrust }        from "../patterns/trust.js"
 import { renderProcess }      from "../patterns/process.js"
 import { renderTestimonials } from "../patterns/testimonials.js"
 import { renderFooter }       from "../patterns/footer.js"
+import { renderHeader }       from "../patterns/header.js"
 
 // Pattern → Render-Funktion
 const RENDER_MAP = {
@@ -36,7 +37,7 @@ const RENDER_MAP = {
   list:         renderText,
   gallery:      renderCards,
   contact:      renderText,
-  header:       renderText,
+  header:       renderHeader,
 }
 
 /**

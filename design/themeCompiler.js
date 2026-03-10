@@ -376,5 +376,50 @@ export function compileTheme(theme) {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Header */
+.site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 64px; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--c-border); transition: transform var(--duration-norm) var(--ease-out), box-shadow var(--duration-norm) var(--ease-out); }
+.site-header--hidden { transform: translateY(-100%); }
+.site-header--scrolled { box-shadow: var(--sh-soft); }
+.site-header--dark { background: rgba(15,15,35,0.85); border-bottom-color: rgba(255,255,255,0.08); }
+.site-header--dark .site-header__name { color: #f5f5f5; }
+.site-header--dark .site-header__nav-link { color: rgba(255,255,255,0.7); }
+.site-header--dark .site-header__nav-link:hover { color: #fff; }
+.site-header--dark .site-header__toggle span { background: #f5f5f5; }
+
+.site-header__inner { display: flex; align-items: center; justify-content: space-between; height: 100%; }
+.site-header__brand { display: flex; align-items: center; gap: var(--sp-3); flex-shrink: 0; text-decoration: none; }
+.site-header__logo { width: 42px; height: 42px; border-radius: 50%; background: var(--c-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--fs-sm); overflow: hidden; flex-shrink: 0; }
+.site-header__logo-img { width: 100%; height: 100%; object-fit: cover; }
+.site-header__logo-initials { line-height: 1; }
+.site-header__name { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); color: var(--c-text); }
+
+.site-header__nav { display: flex; align-items: center; gap: var(--sp-5); }
+.site-header__nav-link { font-size: var(--fs-sm); color: var(--c-text-light); text-decoration: none; transition: color var(--duration-fast); text-underline-offset: 6px; }
+.site-header__nav-link:hover { color: var(--c-text); text-decoration: underline; }
+
+.site-header__actions { display: flex; align-items: center; gap: var(--sp-3); }
+.btn--sm { padding: var(--sp-2) var(--sp-4); font-size: var(--fs-sm); }
+
+.site-header__toggle { display: none; width: 44px; height: 44px; background: none; border: none; cursor: pointer; padding: 10px; flex-direction: column; justify-content: center; gap: 5px; }
+.site-header__toggle span { display: block; width: 24px; height: 2px; background: var(--c-text); border-radius: 2px; transition: transform var(--duration-norm) var(--ease-out), opacity var(--duration-fast); }
+.site-header--open .site-header__toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.site-header--open .site-header__toggle span:nth-child(2) { opacity: 0; }
+.site-header--open .site-header__toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.site-header__mobile-nav { position: fixed; inset: 0; background: var(--c-bg); z-index: 99; display: flex; flex-direction: column; padding: 80px var(--sp-6) var(--sp-6); opacity: 0; visibility: hidden; transition: opacity var(--duration-norm) var(--ease-out), visibility var(--duration-norm); }
+.site-header--open .site-header__mobile-nav { opacity: 1; visibility: visible; }
+.site-header__mobile-nav-inner { display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; }
+.site-header__mobile-link { display: block; font-size: var(--fs-xl); font-weight: 500; padding: var(--sp-3) 0; border-bottom: 1px solid var(--c-border); color: var(--c-text); text-decoration: none; }
+.site-header--dark .site-header__mobile-nav { background: #0f0f23; }
+.site-header--dark .site-header__mobile-link { color: #f5f5f5; border-bottom-color: rgba(255,255,255,0.08); }
+
+@media (max-width: 768px) {
+  .site-header { height: 56px; }
+  .site-header__nav { display: none; }
+  .site-header__actions .btn--sm { display: none; }
+  .site-header__toggle { display: flex; }
+  .site-header__logo { width: 36px; height: 36px; font-size: var(--fs-xs); }
+}
 `
 }

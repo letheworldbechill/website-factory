@@ -29,7 +29,7 @@ export const DEFAULT_AREAS = {
 // ── Default Data (Platzhalter-Inhalte) ──────────────────────────────────────
 
 export const DEFAULT_DATA = {
-  header:       { title: "Unternehmen" },
+  header:       { title: "Unternehmen", logoText: "", logoImage: "", navItems: [], ctaText: "", ctaUrl: "#kontakt" },
   hero:         { title: "Willkommen bei uns", subtitle: "Wir bieten professionelle Dienstleistungen für Ihren Erfolg.", label: "Ihr Partner", ctaPrimary: "Kontakt aufnehmen", ctaPrimaryUrl: "#kontakt", ctaSecondary: "Mehr erfahren", ctaSecondaryUrl: "#leistungen" },
   trust:        { title: "Zahlen, die überzeugen" },
   authority:    { title: "Unsere Expertise", body: "Mit langjähriger Erfahrung und fundiertem Fachwissen stehen wir Ihnen als verlässlicher Partner zur Seite." },

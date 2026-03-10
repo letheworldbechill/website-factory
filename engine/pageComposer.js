@@ -39,10 +39,10 @@ const INDUSTRY_EXTENSIONS = {
 // ── Complexity Map (Fibonacci) ────────────────────────────────────────────────
 
 const COMPLEXITY = {
-  1: ["hero", "cta", "footer"],
-  3: ["hero", "services", "cta", "footer"],
-  5: ["hero", "trust", "services", "testimonials", "cta", "footer"],
-  8: ["hero", "trust", "authority", "services", "process", "testimonials", "faq", "cta", "footer"],
+  1: ["header", "hero", "cta", "footer"],
+  3: ["header", "hero", "services", "cta", "footer"],
+  5: ["header", "hero", "trust", "services", "testimonials", "cta", "footer"],
+  8: ["header", "hero", "trust", "authority", "services", "process", "testimonials", "faq", "cta", "footer"],
 }
 
 // ── Reihenfolge ───────────────────────────────────────────────────────────────
