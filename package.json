@@ -5,6 +5,7 @@
   "description": "Zero-dependency, schema-driven static website generator",
   "type": "module",
   "scripts": {
-    "build": "node preview/build-preview.mjs"
+    "build": "node preview/build-preview.mjs",
+    "test": "node --test test/*.test.js"
   }
 }
