@@ -276,6 +276,23 @@ function autoStyleEngine(settings = {}, context = {}) {
   return next;
 }
 
+// ── ESM exports ──────────────────────────────────────────────────────────────
+
+export {
+  INDUSTRY_POLICIES,
+  autoStyleEngine,
+  computeContentStats,
+  pickPrimaryAccent,
+  buildIndustryPolicy,
+  decideDensity,
+  getIndustryColorFallback,
+  normalizeHex,
+  hexToRgb,
+  luminance,
+}
+
+// ── Legacy UMD ───────────────────────────────────────────────────────────────
+
 const api = {
   INDUSTRY_POLICIES,
   autoStyleEngine,

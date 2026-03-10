@@ -369,7 +369,7 @@ const ESC_MAP = {
  * @param {any}    value - Zu escapender Wert
  * @returns {string}     - Sicherer HTML-String
  */
-export function esc(value) {
+function esc(value) {
   if (value === null || value === undefined) return ""
   return String(value).replace(/[&<>"'`/]/g, c => ESC_MAP[c])
 }
@@ -381,7 +381,7 @@ export function esc(value) {
  * @param {string} url
  * @returns {string}
  */
-export function escUrl(url) {
+function escUrl(url) {
   if (!url) return "#"
   const s = String(url).trim()
   // javascript: und data: sind gefährlich
@@ -414,7 +414,7 @@ function shortId(length = 4) {
  * Erzeugt eine Section-ID im Format "<type>-<shortid>".
  * Beispiel: "hero-a1b2", "services-x9y8"
  */
-export function sectionId(type) {
+function sectionId(type) {
   return `${type}-${shortId()}`
 }
 
@@ -427,7 +427,7 @@ export function sectionId(type) {
 
 // ── Default Areas (Fibonacci-Gewichte) ───────────────────────────────────────
 
-export const DEFAULT_AREAS = {
+const DEFAULT_AREAS = {
   header:       { content: 1 },
   hero:         { content: 8, image: 5 },
   trust:        { content: 1 },
@@ -448,8 +448,8 @@ export const DEFAULT_AREAS = {
 
 // ── Default Data (Platzhalter-Inhalte) ──────────────────────────────────────
 
-export const DEFAULT_DATA = {
-  header:       { title: "Unternehmen" },
+const DEFAULT_DATA = {
+  header:       { title: "Unternehmen", logoText: "", logoImage: "", navItems: [], ctaText: "", ctaUrl: "#kontakt" },
   hero:         { title: "Willkommen bei uns", subtitle: "Wir bieten professionelle Dienstleistungen für Ihren Erfolg.", label: "Ihr Partner", ctaPrimary: "Kontakt aufnehmen", ctaPrimaryUrl: "#kontakt", ctaSecondary: "Mehr erfahren", ctaSecondaryUrl: "#leistungen" },
   trust:        { title: "Zahlen, die überzeugen" },
   authority:    { title: "Unsere Expertise", body: "Mit langjähriger Erfahrung und fundiertem Fachwissen stehen wir Ihnen als verlässlicher Partner zur Seite." },
@@ -469,7 +469,7 @@ export const DEFAULT_DATA = {
 
 // ── Default Items (für Listen-Sections) ─────────────────────────────────────
 
-export const DEFAULT_ITEMS = {
+const DEFAULT_ITEMS = {
   trust: [
     { stat: "15+",  label: "Jahre Erfahrung" },
     { stat: "500+", label: "Zufriedene Kunden" },
@@ -513,7 +513,7 @@ export const DEFAULT_ITEMS = {
 
 // ── Industry-specific Content ───────────────────────────────────────────────
 
-export const INDUSTRY_CONTENT = {
+const INDUSTRY_CONTENT = {
   treuhand: {
     hero:         { title: "Ihre Treuhand mit Weitblick", subtitle: "Buchhaltung, Steuern und Beratung aus einer Hand.", label: "Treuhand" },
     trust:        { title: "Vertrauen durch Kompetenz" },
@@ -629,7 +629,7 @@ export const INDUSTRY_CONTENT = {
 
 // ── Default Settings ──────────────────────────────────────────────────────────
 
-export const DEFAULT_SETTINGS = {
+const DEFAULT_SETTINGS = {
   header:       { background: "default", paddingTop: "none",  paddingBottom: "none" },
   hero:         { background: "default", paddingTop: "xl",    paddingBottom: "xl"   },
   trust:        { background: "alt",     paddingTop: "md",    paddingBottom: "md",   textAlign: "center" },
@@ -661,7 +661,7 @@ export const DEFAULT_SETTINGS = {
  * braucht muss hier vorhanden sein.
  */
 
-export const GRAPH = {
+const GRAPH = {
   header:       ["hero"],
   hero:         ["trust", "authority", "services", "benefits", "process", "gallery", "cta"],
   trust:        ["authority", "services", "benefits", "process", "team"],
@@ -683,7 +683,7 @@ export const GRAPH = {
 /**
  * Prüft ob ein Übergang von source → target erlaubt ist.
  */
-export function isValidTransition(source, target) {
+function isValidTransition(source, target) {
   return GRAPH[source]?.includes(target) ?? false
 }
 
@@ -694,7 +694,7 @@ export function isValidTransition(source, target) {
  * @param {string[]} sequence - z.B. ["hero", "trust", "services", "cta", "footer"]
  * @returns {string[]}        - Verstösse
  */
-export function validateSequence(sequence) {
+function validateSequence(sequence) {
   const violations = []
 
   for (let i = 0; i < sequence.length - 1; i++) {
@@ -720,7 +720,7 @@ export function validateSequence(sequence) {
 /**
  * Gibt alle bekannten Section-Typen zurück.
  */
-export function allSectionTypes() {
+function allSectionTypes() {
   return Object.keys(GRAPH)
 }
 
@@ -756,7 +756,7 @@ const THEME_DEFAULTS = {
  * @param {object} input - Rohe Eingabe (kann unvollständig sein)
  * @returns {object}     - Vollständige, normierte DSL
  */
-export function parse(input) {
+function parse(input) {
   if (!input || typeof input !== "object") {
     throw new Error("Parser: Input muss ein Objekt sein")
   }
@@ -940,10 +940,10 @@ const INDUSTRY_EXTENSIONS = {
 // ── Complexity Map (Fibonacci) ────────────────────────────────────────────────
 
 const COMPLEXITY = {
-  1: ["hero", "cta", "footer"],
-  3: ["hero", "services", "cta", "footer"],
-  5: ["hero", "trust", "services", "testimonials", "cta", "footer"],
-  8: ["hero", "trust", "authority", "services", "process", "testimonials", "faq", "cta", "footer"],
+  1: ["header", "hero", "cta", "footer"],
+  3: ["header", "hero", "services", "cta", "footer"],
+  5: ["header", "hero", "trust", "services", "testimonials", "cta", "footer"],
+  8: ["header", "hero", "trust", "authority", "services", "process", "testimonials", "faq", "cta", "footer"],
 }
 
 // ── Reihenfolge ───────────────────────────────────────────────────────────────
@@ -976,7 +976,7 @@ const CANONICAL_ORDER = [
  * @param {object} site - site-Objekt aus der DSL (nach dem Parser)
  * @returns {string[]}  - z.B. ["hero", "trust", "services", "faq", "cta", "footer"]
  */
-export function composePage(site) {
+function composePage(site) {
   const base       = COMPLEXITY[site.complexity] || COMPLEXITY[5]
   const extensions = INDUSTRY_EXTENSIONS[site.industry] || []
 
@@ -1000,14 +1000,14 @@ export function composePage(site) {
  * Gibt die Basis-Sections für einen pageType zurück (ohne industry/complexity).
  * Nützlich für Tests und Previews.
  */
-export function basePageSections(pageType) {
+function basePageSections(pageType) {
   return PAGE_TYPES[pageType] || PAGE_TYPES.landing
 }
 
 /**
  * Gibt die Industry-Extensions für eine Branche zurück.
  */
-export function industryExtensions(industry) {
+function industryExtensions(industry) {
   return INDUSTRY_EXTENSIONS[industry] || []
 }
 
@@ -1025,7 +1025,7 @@ export function industryExtensions(industry) {
  * @param {string}   [industry]  - Branche für branchenspezifische Inhalte
  * @returns {object[]}            - Vollständige Section-Objekte
  */
-export function composeSections(sectionTypes, industry) {
+function composeSections(sectionTypes, industry) {
   const ic = (industry && INDUSTRY_CONTENT[industry]) || {}
 
   return sectionTypes.map(type => {
@@ -1055,7 +1055,7 @@ export function composeSections(sectionTypes, industry) {
  * Erzeugt eine einzelne Section für einen Typ.
  * Nützlich wenn der Page Composer eine neue Section zu einer bestehenden Page hinzufügt.
  */
-export function composeSection(type, industry) {
+function composeSection(type, industry) {
   return composeSections([type], industry)[0]
 }
 
@@ -1091,7 +1091,7 @@ const FIXED_PATTERNS = {
  * @param {object} section - Section-Objekt (muss type und optional items haben)
  * @returns {string}       - Pattern-Bezeichner
  */
-export function selectPattern(section) {
+function selectPattern(section) {
   // 1. Expliziter Override in der DSL
   if (section.pattern) return section.pattern
 
@@ -1131,7 +1131,7 @@ const LAYOUT_TYPES = {
  * @param {object} section - Section mit areas-Objekt
  * @returns {object}       - Layout-Beschreibung
  */
-export function composeLayout(section) {
+function composeLayout(section) {
   const areas   = section.areas || { content: 1 }
   const keys    = Object.keys(areas)
   const values  = Object.values(areas)
@@ -1156,7 +1156,7 @@ export function composeLayout(section) {
  * @param {object} layout - Ergebnis von composeLayout()
  * @returns {string}      - CSS-Klassen-String
  */
-export function layoutClass(layout) {
+function layoutClass(layout) {
   const map = {
     stack:  "layout-stack",
     split:  "layout-split",
@@ -1170,7 +1170,7 @@ export function layoutClass(layout) {
  * patterns/trust.js — KPI-Zahlen / Kennzahlen-Leiste
  */
 
-export function renderTrust(section, layout) {
+function renderTrust(section, layout) {
   const d     = section.data  || {}
   const items = section.items || []
   const bg    = esc(section.settings?.background || "alt")
@@ -1196,7 +1196,7 @@ export function renderTrust(section, layout) {
  * patterns/process.js — Nummerierte Schritte
  */
 
-export function renderProcess(section, layout) {
+function renderProcess(section, layout) {
   const d     = section.data  || {}
   const items = section.items || []
   const bg    = esc(section.settings?.background || "default")
@@ -1230,7 +1230,7 @@ function stars(rating) {
   return "★".repeat(n) + "☆".repeat(5 - n)
 }
 
-export function renderTestimonials(section, layout) {
+function renderTestimonials(section, layout) {
   const d     = section.data  || {}
   const items = section.items || []
   const bg    = esc(section.settings?.background || "alt")
@@ -1263,7 +1263,7 @@ export function renderTestimonials(section, layout) {
  * patterns/faq.js
  */
 
-export function renderFaq(section, layout) {
+function renderFaq(section, layout) {
   const d     = section.data  || {}
   const items = section.items || []
   const bg    = esc(section.settings?.background || "default")
@@ -1290,7 +1290,7 @@ export function renderFaq(section, layout) {
  * patterns/cta.js
  */
 
-export function renderCta(section, layout) {
+function renderCta(section, layout) {
   const d     = section.data || {}
   const bg    = esc(section.settings?.background || "brand")
   const align = esc(section.settings?.textAlign  || "center")
@@ -1315,7 +1315,7 @@ export function renderCta(section, layout) {
  * patterns/footer.js
  */
 
-export function renderFooter(section, layout, config) {
+function renderFooter(section, layout, config) {
   const d     = section.data || {}
   const legal = config?.legal || {}
   const site  = config?.site  || {}
@@ -1351,7 +1351,7 @@ export function renderFooter(section, layout, config) {
  * patterns/hero.js
  */
 
-export function renderHero(section, layout) {
+function renderHero(section, layout) {
   const d       = section.data || {}
   const hasCols = layout.areaNames.length > 1
   const bg      = esc(section.settings?.background   || "default")
@@ -1381,7 +1381,7 @@ export function renderHero(section, layout) {
  * patterns/text.js
  */
 
-export function renderText(section, layout) {
+function renderText(section, layout) {
   const d  = section.data || {}
   const bg = esc(section.settings?.background || "default")
   const pt = esc(section.settings?.paddingTop    || "lg")
@@ -1401,7 +1401,7 @@ export function renderText(section, layout) {
  * patterns/cards.js — 2–4 Items als Karten
  */
 
-export function renderCards(section, layout) {
+function renderCards(section, layout) {
   const d     = section.data  || {}
   const items = section.items || []
   const bg    = esc(section.settings?.background || "default")
@@ -1431,6 +1431,205 @@ export function renderCards(section, layout) {
 }
 
 /**
+ * patterns/header.js
+ *
+ * Fixed header with glass effect, auto-generated nav, hamburger mobile menu.
+ */
+
+// Section types that belong in auto-generated navigation
+const NAV_TYPES = [
+  "services", "benefits", "process", "team",
+  "gallery", "testimonials", "pricing", "faq", "contact",
+]
+
+// German fallback labels for section types
+const SECTION_LABELS = {
+  services:     "Leistungen",
+  benefits:     "Vorteile",
+  process:      "Ablauf",
+  team:         "Team",
+  gallery:      "Galerie",
+  testimonials: "Kundenstimmen",
+  pricing:      "Preise",
+  faq:          "FAQ",
+  contact:      "Kontakt",
+}
+
+/**
+ * Resolves navigation items — explicit or auto-generated from sibling sections.
+ */
+function resolveNavItems(section, config) {
+  const explicit = section.data?.navItems
+  if (Array.isArray(explicit) && explicit.length > 0) {
+    return explicit.map(item => {
+      if (typeof item === "string") {
+        const id = item.toLowerCase().replace(/\s+/g, "-")
+        return { label: item, href: `#${id}` }
+      }
+      return { label: item.label || item, href: item.href || `#${(item.label || "").toLowerCase().replace(/\s+/g, "-")}` }
+    })
+  }
+
+  // Auto-generate from page sections
+  const sections = config._pageSections || []
+  return sections
+    .filter(s => NAV_TYPES.includes(s.type) && s.enabled !== false)
+    .map(s => ({
+      label: s.data?.label || s.data?.title || SECTION_LABELS[s.type] || s.type,
+      href: `#${s.id}`,
+    }))
+}
+
+/**
+ * Derives logo initials from a brand name.
+ * "Müller Treuhand AG" → "MT"
+ */
+function deriveInitials(name) {
+  if (!name) return "?"
+  const words = name.trim().split(/\s+/).filter(w => !/^(AG|GmbH|SA|Ltd|Inc|Co|KG)$/i.test(w))
+  if (words.length === 0) return "?"
+  return words.slice(0, 2).map(w => w[0].toUpperCase()).join("")
+}
+
+function renderHeader(section, layout, config) {
+  const d         = section.data || {}
+  const brandName = config.site?.name || d.title || "Unternehmen"
+  const navItems  = resolveNavItems(section, config)
+  const preset    = config.theme?.preset || ""
+  const isDark    = preset === "glass" || preset === "clear4-dark"
+
+  // Logo
+  let logoHtml
+  if (d.logoImage) {
+    logoHtml = `<img src="${escUrl(d.logoImage)}" alt="${esc(brandName)}" class="site-header__logo-img">`
+  } else {
+    const initials = d.logoText || deriveInitials(brandName)
+    logoHtml = `<span class="site-header__logo-initials">${esc(initials)}</span>`
+  }
+
+  // Nav links
+  const navLinksHtml = navItems.map(item =>
+    `<a href="${escUrl(item.href)}" class="site-header__nav-link">${esc(item.label)}</a>`
+  ).join("\n        ")
+
+  // CTA button
+  const ctaHtml = d.ctaText
+    ? `<a href="${escUrl(d.ctaUrl || "#kontakt")}" class="btn btn--primary btn--sm">${esc(d.ctaText)}</a>`
+    : ""
+
+  // Mobile nav links
+  const mobileLinksHtml = navItems.map(item =>
+    `<a href="${escUrl(item.href)}" class="site-header__mobile-link">${esc(item.label)}</a>`
+  ).join("\n        ")
+
+  const mobileCtaHtml = d.ctaText
+    ? `<a href="${escUrl(d.ctaUrl || "#kontakt")}" class="btn btn--primary" style="margin-top:auto">${esc(d.ctaText)}</a>`
+    : ""
+
+  return `<header class="site-header${isDark ? " site-header--dark" : ""}" id="${esc(section.id)}">
+  <div class="site-header__inner container">
+    <a href="#" class="site-header__brand">
+      <span class="site-header__logo">${logoHtml}</span>
+      <span class="site-header__name">${esc(brandName)}</span>
+    </a>
+    <nav class="site-header__nav" aria-label="Hauptnavigation">
+      ${navLinksHtml}
+    </nav>
+    <div class="site-header__actions">
+      ${ctaHtml}
+      <button class="site-header__toggle" aria-label="Menü öffnen" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="site-header__mobile-nav" aria-hidden="true">
+    <nav class="site-header__mobile-nav-inner">
+      ${mobileLinksHtml}
+      ${mobileCtaHtml}
+    </nav>
+  </div>
+</header>`
+}
+
+/**
+ * Returns a <script> block for header interactivity:
+ * scroll hide/show, hamburger toggle, smooth scroll offset, focus management.
+ */
+function compileHeaderScript() {
+  return `<script>
+(function(){
+  var hdr = document.querySelector('.site-header');
+  if (!hdr) return;
+  var toggle = hdr.querySelector('.site-header__toggle');
+  var mobileNav = hdr.querySelector('.site-header__mobile-nav');
+  var lastY = 0;
+  var ticking = false;
+
+  /* Scroll: hide on down, show on up, shadow after 10px */
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var y = window.scrollY;
+      if (y > lastY && y > 80) hdr.classList.add('site-header--hidden');
+      else hdr.classList.remove('site-header--hidden');
+      hdr.classList.toggle('site-header--scrolled', y > 10);
+      lastY = y;
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  /* Hamburger toggle */
+  function openMenu() {
+    toggle.setAttribute('aria-expanded', 'true');
+    mobileNav.setAttribute('aria-hidden', 'false');
+    hdr.classList.add('site-header--open');
+    document.body.style.overflow = 'hidden';
+    var firstLink = mobileNav.querySelector('a');
+    if (firstLink) firstLink.focus();
+  }
+  function closeMenu() {
+    toggle.setAttribute('aria-expanded', 'false');
+    mobileNav.setAttribute('aria-hidden', 'true');
+    hdr.classList.remove('site-header--open');
+    document.body.style.overflow = '';
+    toggle.focus();
+  }
+
+  toggle.addEventListener('click', function(){
+    var open = toggle.getAttribute('aria-expanded') === 'true';
+    open ? closeMenu() : openMenu();
+  });
+
+  /* Close on link click */
+  mobileNav.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', closeMenu);
+  });
+
+  /* Close on Escape */
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && hdr.classList.contains('site-header--open')) closeMenu();
+  });
+
+  /* Smooth scroll offset for fixed header */
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var id = this.getAttribute('href').slice(1);
+      if (!id) return;
+      var el = document.getElementById(id);
+      if (!el) return;
+      e.preventDefault();
+      var offset = hdr.offsetHeight + 16;
+      var top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({top: top, behavior: 'smooth'});
+    });
+  });
+})();
+</script>`
+}
+
+/**
  * engine/validator.js
  *
  * Semantischer Validator — prüft die DSL nach dem Parser.
@@ -1453,7 +1652,7 @@ const VALID_SECTION_TYPES = new Set([
  *
  * @param {object} dsl - Geparste DSL
  */
-export function validateDSL(dsl) {
+function validateDSL(dsl) {
   const errors   = []
   const warnings = []
 
@@ -1554,7 +1753,7 @@ const RENDER_MAP = {
   list:         renderText,
   gallery:      renderCards,
   contact:      renderText,
-  header:       renderText,
+  header:       renderHeader,
 }
 
 /**
@@ -1564,7 +1763,7 @@ const RENDER_MAP = {
  * @param {object} config  - Vollständige DSL (für footer: legal, site)
  * @returns {string}       - HTML-String
  */
-export function renderSection(section, config = {}) {
+function renderSection(section, config = {}) {
   if (section.enabled === false) return ""
 
   const pattern = selectPattern(section)
@@ -1731,7 +1930,7 @@ const RADIUS_MAP = {
  * @param {object} theme - Theme nach parse()
  * @returns {string}     - CSS-String
  */
-export function compileTheme(theme) {
+function compileTheme(theme) {
   const base    = PRESETS[theme.preset] || PRESETS.swiss
   const density = DENSITY_SCALE[theme.density] || 1.0
   const scale   = (theme.spacingScale || 1.0) * density
@@ -1957,8 +2156,348 @@ export function compileTheme(theme) {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Header */
+.site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 64px; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--c-border); transition: transform var(--duration-norm) var(--ease-out), box-shadow var(--duration-norm) var(--ease-out); }
+.site-header--hidden { transform: translateY(-100%); }
+.site-header--scrolled { box-shadow: var(--sh-soft); }
+.site-header--dark { background: rgba(15,15,35,0.85); border-bottom-color: rgba(255,255,255,0.08); }
+.site-header--dark .site-header__name { color: #f5f5f5; }
+.site-header--dark .site-header__nav-link { color: rgba(255,255,255,0.7); }
+.site-header--dark .site-header__nav-link:hover { color: #fff; }
+.site-header--dark .site-header__toggle span { background: #f5f5f5; }
+
+.site-header__inner { display: flex; align-items: center; justify-content: space-between; height: 100%; position: relative; z-index: 2; }
+.site-header__brand { display: flex; align-items: center; gap: var(--sp-3); flex-shrink: 0; text-decoration: none; }
+.site-header__logo { width: 42px; height: 42px; border-radius: 50%; background: var(--c-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--fs-sm); overflow: hidden; flex-shrink: 0; }
+.site-header__logo-img { width: 100%; height: 100%; object-fit: cover; }
+.site-header__logo-initials { line-height: 1; }
+.site-header__name { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); color: var(--c-text); }
+
+.site-header__nav { display: flex; align-items: center; gap: var(--sp-5); }
+.site-header__nav-link { font-size: var(--fs-sm); color: var(--c-text-light); text-decoration: none; transition: color var(--duration-fast); text-underline-offset: 6px; }
+.site-header__nav-link:hover { color: var(--c-text); text-decoration: underline; }
+
+.site-header__actions { display: flex; align-items: center; gap: var(--sp-3); }
+.btn--sm { padding: var(--sp-2) var(--sp-4); font-size: var(--fs-sm); }
+
+.site-header__toggle { display: none; width: 44px; height: 44px; background: none; border: none; cursor: pointer; padding: 10px; flex-direction: column; justify-content: center; gap: 5px; }
+.site-header__toggle span { display: block; width: 24px; height: 2px; background: var(--c-text); border-radius: 2px; transition: transform var(--duration-norm) var(--ease-out), opacity var(--duration-fast); }
+.site-header--open .site-header__toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.site-header--open .site-header__toggle span:nth-child(2) { opacity: 0; }
+.site-header--open .site-header__toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.site-header__mobile-nav { position: fixed; inset: 0; background: var(--c-bg); z-index: 99; display: flex; flex-direction: column; padding: 80px var(--sp-6) var(--sp-6); opacity: 0; visibility: hidden; transition: opacity var(--duration-norm) var(--ease-out), visibility var(--duration-norm); }
+.site-header--open .site-header__mobile-nav { opacity: 1; visibility: visible; }
+.site-header__mobile-nav-inner { display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; }
+.site-header__mobile-link { display: block; font-size: var(--fs-xl); font-weight: 500; padding: var(--sp-3) 0; border-bottom: 1px solid var(--c-border); color: var(--c-text); text-decoration: none; }
+.site-header--dark .site-header__mobile-nav { background: #0f0f23; }
+.site-header--dark .site-header__mobile-link { color: #f5f5f5; border-bottom-color: rgba(255,255,255,0.08); }
+
+@media (max-width: 768px) {
+  .site-header { height: 56px; }
+  .site-header__nav { display: none; }
+  .site-header__actions .btn--sm { display: none; }
+  .site-header__toggle { display: flex; }
+  .site-header__logo { width: 36px; height: 36px; font-size: var(--fs-xs); }
+}
 `
 }
+
+/**
+ * Smooth Builder Auto Style Engine
+ * Deterministic, dependency-free rule engine for deriving style settings.
+ */
+
+const INDUSTRY_POLICIES = {
+  anwalt: {
+    preset: 'editorial',
+    fontStack: 'serif',
+    darkMode: false,
+    densityDefault: 'airy',
+    fx: { orbs: false, glass: false, grain: true, intensity: 'subtle' }
+  },
+  kanzlei: {
+    preset: 'editorial',
+    fontStack: 'serif',
+    darkMode: false,
+    densityDefault: 'airy',
+    fx: { orbs: false, glass: false, grain: true, intensity: 'subtle' }
+  },
+  treuhand: {
+    preset: 'swiss',
+    fontStack: 'instrument',
+    darkMode: false,
+    densityDefault: 'balanced',
+    fx: { orbs: false, glass: false, grain: false, intensity: 'subtle' }
+  },
+  finanzberatung: {
+    preset: 'swiss',
+    fontStack: 'instrument',
+    darkMode: false,
+    densityDefault: 'balanced',
+    fx: { orbs: false, glass: false, grain: false, intensity: 'subtle' }
+  },
+  it: {
+    preset: 'glass',
+    fontStack: 'inter',
+    darkMode: true,
+    densityDefault: 'balanced',
+    fx: { orbs: true, glass: true, grain: true, intensity: 'medium' }
+  },
+  saas: {
+    preset: 'glass',
+    fontStack: 'inter',
+    darkMode: true,
+    densityDefault: 'balanced',
+    fx: { orbs: true, glass: true, grain: true, intensity: 'medium' }
+  },
+  fitness: {
+    preset: 'signature',
+    fontStack: 'dmsans',
+    darkMode: false,
+    densityDefault: 'balanced',
+    fx: { orbs: true, glass: false, grain: false, intensity: 'medium' }
+  },
+  gastro: {
+    preset: 'editorial',
+    fontStack: 'serif',
+    darkMode: false,
+    densityDefault: 'airy',
+    fx: { orbs: false, glass: false, grain: true, intensity: 'subtle' }
+  },
+  restaurant: {
+    preset: 'editorial',
+    fontStack: 'serif',
+    darkMode: false,
+    densityDefault: 'airy',
+    fx: { orbs: false, glass: false, grain: true, intensity: 'subtle' }
+  }
+};
+
+const DEFAULT_POLICY = {
+  preset: 'swiss',
+  fontStack: 'instrument',
+  darkMode: false,
+  densityDefault: 'balanced',
+  fx: { orbs: false, glass: false, grain: false, intensity: 'subtle' }
+};
+
+const FALLBACK_PALETTE = [
+  { primary: '#1e3a5f', accent: '#ca8a04' },
+  { primary: '#0f766e', accent: '#f59e0b' },
+  { primary: '#1d4ed8', accent: '#14b8a6' }
+];
+
+function normalizeHex(hex) {
+  if (typeof hex !== 'string') return null;
+  const raw = hex.trim().replace('#', '');
+  if (/^[0-9a-fA-F]{3}$/.test(raw)) {
+    return `#${raw.split('').map((ch) => ch + ch).join('').toLowerCase()}`;
+  }
+  if (/^[0-9a-fA-F]{6}$/.test(raw)) return `#${raw.toLowerCase()}`;
+  return null;
+}
+
+function hexToRgb(hex) {
+  const n = normalizeHex(hex);
+  if (!n) return null;
+  const v = n.slice(1);
+  return {
+    r: Number.parseInt(v.slice(0, 2), 16),
+    g: Number.parseInt(v.slice(2, 4), 16),
+    b: Number.parseInt(v.slice(4, 6), 16)
+  };
+}
+
+function luminance(rgb) {
+  if (!rgb) return Number.NaN;
+  return 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+}
+
+function isNearBlack(y) { return y < 20; }
+function isNearWhite(y) { return y > 235; }
+
+function estimateAverageTextLength(components) {
+  const values = [];
+
+  function visit(node) {
+    if (typeof node === 'string') {
+      const trimmed = node.trim();
+      if (trimmed) values.push(trimmed.length);
+      return;
+    }
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
+    if (node && typeof node === 'object') {
+      Object.values(node).forEach(visit);
+    }
+  }
+
+  visit(components);
+  if (!values.length) return 0;
+  return Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+}
+
+function computeContentStats(components = {}) {
+  return {
+    servicesCount: components?.services?.items?.length ?? 0,
+    benefitsCount: components?.benefits?.items?.length ?? 0,
+    faqCount: components?.faq?.items?.length ?? 0,
+    testimonialsCount: components?.testimonials?.items?.length ?? 0,
+    hasProofTable: Boolean(components?.proofTable?.enabled),
+    hasProcess: Boolean(components?.process?.enabled),
+    hasGallery: Boolean(components?.gallery?.enabled),
+    heroSubtitleLength: (components?.hero?.subtitle ?? '').length,
+    avgTextLength: estimateAverageTextLength(components)
+  };
+}
+
+function decideDensity(stats, industryKey, fallback = 'balanced') {
+  const totalCards = (stats?.servicesCount ?? 0) + (stats?.benefitsCount ?? 0) + (stats?.faqCount ?? 0);
+  const key = String(industryKey || '').toLowerCase();
+
+  if (stats?.hasProofTable && stats?.hasProcess && totalCards >= 12) return 'compact';
+  if (['anwalt', 'treuhand', 'finanzberatung', 'kanzlei'].includes(key) && (stats?.avgTextLength ?? 0) > 220) return 'airy';
+  if ((stats?.heroSubtitleLength ?? 0) > 180 && totalCards < 8) return 'airy';
+
+  return fallback;
+}
+
+function applyAggressiveness(policy, mode) {
+  if (mode === 'conservative') {
+    return {
+      ...policy,
+      preset: policy.preset === 'glass' ? 'swiss' : policy.preset,
+      fx: { ...policy.fx, orbs: false, glass: false, intensity: 'subtle' }
+    };
+  }
+  if (mode === 'bold') {
+    return {
+      ...policy,
+      preset: policy.preset === 'swiss' ? 'glass' : policy.preset,
+      fx: { ...policy.fx, orbs: true, grain: true, intensity: policy.fx?.intensity ?? 'medium' }
+    };
+  }
+  return policy;
+}
+
+function buildIndustryPolicy(industryKey, aggressiveness = 'balanced') {
+  const key = String(industryKey || '').toLowerCase();
+  const base = INDUSTRY_POLICIES[key] || DEFAULT_POLICY;
+  return applyAggressiveness(base, aggressiveness);
+}
+
+function isAmberGold(hex) {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return false;
+  // Warm highlight bucket
+  return rgb.r > 160 && rgb.g > 100 && rgb.b < 90;
+}
+
+function pickPrimaryAccent(logoColors = [], industryKey = '') {
+  const candidates = logoColors
+    .map((hex) => ({ hex: normalizeHex(hex), y: luminance(hexToRgb(hex)) }))
+    .filter((c) => c.hex && Number.isFinite(c.y));
+
+  if (!candidates.length) return { primary: null, accent: null };
+
+  const usableDark = candidates
+    .filter((c) => !isNearBlack(c.y))
+    .sort((a, b) => a.y - b.y);
+
+  const usableLight = candidates
+    .filter((c) => !isNearWhite(c.y))
+    .sort((a, b) => b.y - a.y);
+
+  const primary = (usableDark[0] || candidates.sort((a, b) => a.y - b.y)[0]).hex;
+
+  const key = String(industryKey || '').toLowerCase();
+  const wantsWarmAccent = ['anwalt', 'kanzlei', 'gastro', 'restaurant'].includes(key);
+
+  let accentCandidate = null;
+  if (wantsWarmAccent) {
+    accentCandidate = usableLight.find((c) => isAmberGold(c.hex)) || null;
+  }
+
+  const accent = (accentCandidate || usableLight[0] || candidates.sort((a, b) => b.y - a.y)[0]).hex;
+
+  if (accent === primary) {
+    const different = candidates.find((c) => c.hex !== primary);
+    return { primary, accent: different ? different.hex : primary };
+  }
+
+  return { primary, accent };
+}
+
+function getIndustryColorFallback(industryKey) {
+  const key = String(industryKey || '').toLowerCase();
+
+  if (['anwalt', 'kanzlei', 'treuhand', 'finanzberatung'].includes(key)) return FALLBACK_PALETTE[0];
+  if (['it', 'saas'].includes(key)) return FALLBACK_PALETTE[2];
+  if (['gastro', 'restaurant'].includes(key)) return FALLBACK_PALETTE[1];
+  return FALLBACK_PALETTE[0];
+}
+
+function autoStyleEngine(settings = {}, context = {}) {
+  const next = JSON.parse(JSON.stringify(settings || {}));
+  const locks = context.locks || {};
+  const industryKey = context.industryKey || next.industry || '';
+  const policy = buildIndustryPolicy(industryKey, context.aggressiveness || 'balanced');
+  const stats = context.contentStats || computeContentStats(context.components || {});
+
+  if (!locks.preset) next.stylePreset = policy.preset;
+  if (!locks.typography) next.fontStack = policy.fontStack;
+  if (!locks.density) next.designDensity = decideDensity(stats, industryKey, policy.densityDefault);
+
+  if (!locks.fx) {
+    next.darkMode = policy.darkMode;
+    next.fxOrbs = policy.fx.orbs;
+    next.fxGlass = policy.fx.glass;
+    next.fxGrain = policy.fx.grain;
+    next.fxIntensity = policy.fx.intensity;
+  }
+
+  if (!locks.colors) {
+    if (next.useColorStack && next.colorStack) {
+      // keep user-decided stack
+    } else if (context.colorStack && context.acceptColorStack !== false) {
+      next.colorStack = context.colorStack;
+      next.useColorStack = true;
+    } else {
+      const { primary, accent } = pickPrimaryAccent(context.logoColors || [], industryKey);
+      if (primary && accent) {
+        next.primaryColor = primary;
+        next.accentColor = accent;
+      } else {
+        const fallback = getIndustryColorFallback(industryKey);
+        next.primaryColor = fallback.primary;
+        next.accentColor = fallback.accent;
+      }
+    }
+  }
+
+  return next;
+}
+
+// ── ESM exports ──────────────────────────────────────────────────────────────
+
+// ── Legacy UMD ───────────────────────────────────────────────────────────────
+
+const api = {
+  INDUSTRY_POLICIES,
+  autoStyleEngine,
+  computeContentStats,
+  pickPrimaryAccent,
+  buildIndustryPolicy,
+  decideDensity,
+  getIndustryColorFallback,
+  normalizeHex,
+  hexToRgb,
+  luminance
+};
 
 /**
  * engine/compiler.js
@@ -1967,9 +2506,10 @@ export function compileTheme(theme) {
  * DSL → vollständiges HTML-Dokument.
  *
  * Ablauf:
- *   1. parse()     → normierte DSL
- *   2. validateDSL → Fehler/Warnungen
- *   3. composePage → Section-Typen
+ *   1. parse()          → normierte DSL
+ *   2. applyAutoStyle() → industry-aware theme defaults (auto-style-engine)
+ *   3. validateDSL      → Fehler/Warnungen
+ *   4. composePage      → Section-Typen
  *   4. sections übernehmen (aus DSL) oder composeSections (auto)
  *   5. renderSection pro Section
  *   6. compileTheme → CSS
@@ -1984,11 +2524,14 @@ export function compileTheme(theme) {
  * @param {boolean} [opts.strict=false] - Bei true: Fehler werfen statt Warning
  * @returns {string}         - Vollständiges HTML-Dokument
  */
-export function compileSite(input, opts = {}) {
+function compileSite(input, opts = {}) {
   // 1. Parse
   const config = parse(input)
 
-  // 2. Validate
+  // 2. Auto-style: enrich theme with industry-aware defaults
+  applyAutoStyle(config, input)
+
+  // 3. Validate
   const { valid, errors, warnings } = validateDSL(config)
 
   if (warnings.length > 0) {
@@ -2000,7 +2543,7 @@ export function compileSite(input, opts = {}) {
     console.error(msg)
   }
 
-  // 3. Seiten kompilieren (CSS wird intern in compilePage erzeugt)
+  // 4. Seiten kompilieren (CSS wird intern in compilePage erzeugt)
   const pages = config.pages.map(page => compilePage(page, config))
 
   // Bei einer Seite direkt das HTML zurückgeben
@@ -2021,13 +2564,22 @@ function compilePage(page, config) {
     sections = composeSections(types, config.site.industry)
   }
 
+  // Pass sibling sections to renderer for header nav auto-generation
+  const renderConfig = { ...config, _pageSections: sections }
+
   const body = sections
-    .map(section => renderSection(section, config))
+    .map(section => renderSection(section, renderConfig))
     .join("\n")
 
   const meta = compileMeta(page, config)
   const css  = compileTheme(config.theme)
   const lang = esc(config.site.language || "de")
+
+  const hasHeader = sections.some(s => s.type === "header" && s.enabled !== false)
+  const headerPadding = hasHeader
+    ? "\n:root { --header-h: 64px; }\n@media (max-width: 768px) { :root { --header-h: 56px; } }\nbody { padding-top: var(--header-h); }"
+    : ""
+  const headerScript = hasHeader ? "\n" + compileHeaderScript() : ""
 
   return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -2040,14 +2592,72 @@ ${meta}
 html { scroll-behavior: smooth; }
 body { font-family: var(--font-body); background: var(--c-bg); color: var(--c-text); line-height: 1.5; -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
-img { max-width: 100%; display: block; }
+img { max-width: 100%; display: block; }${headerPadding}
 ${css}
 </style>
 </head>
 <body>
-${body}
+${body}${headerScript}
 </body>
 </html>`
+}
+
+// ── Font-Stack → font-family mapping ─────────────────────────────────────────
+
+const FONT_STACKS = {
+  serif:      { display: "Playfair Display, Georgia, serif",      body: "Inter, system-ui, sans-serif" },
+  instrument: { display: "Instrument Sans, system-ui, sans-serif", body: "Instrument Sans, system-ui, sans-serif" },
+  inter:      { display: "Inter, system-ui, sans-serif",           body: "Inter, system-ui, sans-serif" },
+  dmsans:     { display: "DM Sans, system-ui, sans-serif",        body: "DM Sans, system-ui, sans-serif" },
+}
+
+/**
+ * Enriches config.theme with industry-aware defaults from auto-style-engine.
+ * Respects user-provided theme fields (locks) — only fills in gaps.
+ */
+function applyAutoStyle(config, rawInput) {
+  const rawTheme = rawInput?.theme || {}
+
+  // Determine locks: which theme fields the user explicitly provided
+  const locks = {
+    preset:     Boolean(rawTheme.preset),
+    typography: Boolean(rawTheme.font?.display || rawTheme.font?.body),
+    density:    Boolean(rawTheme.density),
+    colors:     Boolean(rawTheme.brand?.primary || rawTheme.brand?.accent),
+    fx:         false,  // FX not yet rendered by compiler — always auto-derive for future use
+  }
+
+  // Build context
+  const context = {
+    locks,
+    industryKey:  config.site.industry,
+    logoColors:   rawInput?.assets?.logoColors || [],
+  }
+
+  const result = autoStyleEngine({}, context)
+
+  // Apply to config.theme (only unlocked fields)
+  if (!locks.preset && result.stylePreset) {
+    config.theme.preset = result.stylePreset
+  }
+  if (!locks.density && result.designDensity) {
+    config.theme.density = result.designDensity
+  }
+  if (!locks.colors) {
+    if (result.primaryColor) {
+      config.theme.brand = config.theme.brand || {}
+      config.theme.brand.primary = result.primaryColor
+    }
+    if (result.accentColor) {
+      config.theme.brand = config.theme.brand || {}
+      config.theme.brand.accent = result.accentColor
+    }
+  }
+  if (!locks.typography && result.fontStack && FONT_STACKS[result.fontStack]) {
+    config.theme.font = config.theme.font || {}
+    config.theme.font.display = config.theme.font.display || FONT_STACKS[result.fontStack].display
+    config.theme.font.body    = config.theme.font.body    || FONT_STACKS[result.fontStack].body
+  }
 }
 
 function compileMeta(page, config) {
