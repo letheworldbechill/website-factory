@@ -18,14 +18,22 @@ const ENGINE_FILES = [
   "engine/patternSelector.js","engine/layoutComposer.js",
   "patterns/trust.js","patterns/process.js","patterns/testimonials.js",
   "patterns/faq.js","patterns/cta.js","patterns/footer.js",
-  "patterns/hero.js","patterns/text.js","patterns/cards.js",
-  "engine/validator.js","engine/renderer.js","design/themeCompiler.js","engine/compiler.js",
+  "patterns/hero.js","patterns/text.js","patterns/cards.js","patterns/header.js",
+  "engine/validator.js","engine/renderer.js","design/themeCompiler.js",
+  "auto-style-engine.js","engine/compiler.js",
 ]
 
 let engineBundle = "// Website Factory Engine Bundle — auto-generated\n"
 for (const f of ENGINE_FILES) {
   let src = readFileSync(join(root, f), "utf8")
+  // Strip ESM import statements
   src = src.replace(/^import\s+\{[^}]+\}\s+from\s+['"]\.\.?\/[^'"]+['"]\s*;?\n/gm, "")
+  // Strip ESM export keywords (export function → function, export const → const)
+  src = src.replace(/^export\s+(function|const|let|var|class)\b/gm, "$1")
+  // Strip standalone export blocks (export { ... })
+  src = src.replace(/^export\s*\{[^}]*\}\s*;?\n?/gm, "")
+  // Strip UMD guards (module.exports / window.* assignments) — not needed in bundle
+  src = src.replace(/^if\s*\(\s*typeof\s+(module|window)\b[^)]*\)\s*\{[^}]*\}\s*\n?/gm, "")
   engineBundle += src.trim() + "\n\n"
 }
 

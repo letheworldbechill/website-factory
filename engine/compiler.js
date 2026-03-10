@@ -5,9 +5,10 @@
  * DSL → vollständiges HTML-Dokument.
  *
  * Ablauf:
- *   1. parse()     → normierte DSL
- *   2. validateDSL → Fehler/Warnungen
- *   3. composePage → Section-Typen
+ *   1. parse()          → normierte DSL
+ *   2. applyAutoStyle() → industry-aware theme defaults (auto-style-engine)
+ *   3. validateDSL      → Fehler/Warnungen
+ *   4. composePage      → Section-Typen
  *   4. sections übernehmen (aus DSL) oder composeSections (auto)
  *   5. renderSection pro Section
  *   6. compileTheme → CSS
@@ -21,6 +22,7 @@ import { composeSections }  from "./sectionComposer.js"
 import { renderSection }    from "./renderer.js"
 import { compileTheme }     from "../design/themeCompiler.js"
 import { compileHeaderScript } from "../patterns/header.js"
+import { autoStyleEngine }  from "../auto-style-engine.js"
 import { esc }              from "./escape.js"
 
 /**
@@ -35,7 +37,10 @@ export function compileSite(input, opts = {}) {
   // 1. Parse
   const config = parse(input)
 
-  // 2. Validate
+  // 2. Auto-style: enrich theme with industry-aware defaults
+  applyAutoStyle(config, input)
+
+  // 3. Validate
   const { valid, errors, warnings } = validateDSL(config)
 
   if (warnings.length > 0) {
@@ -47,7 +52,7 @@ export function compileSite(input, opts = {}) {
     console.error(msg)
   }
 
-  // 3. Seiten kompilieren (CSS wird intern in compilePage erzeugt)
+  // 4. Seiten kompilieren (CSS wird intern in compilePage erzeugt)
   const pages = config.pages.map(page => compilePage(page, config))
 
   // Bei einer Seite direkt das HTML zurückgeben
@@ -104,6 +109,64 @@ ${css}
 ${body}${headerScript}
 </body>
 </html>`
+}
+
+// ── Font-Stack → font-family mapping ─────────────────────────────────────────
+
+const FONT_STACKS = {
+  serif:      { display: "Playfair Display, Georgia, serif",      body: "Inter, system-ui, sans-serif" },
+  instrument: { display: "Instrument Sans, system-ui, sans-serif", body: "Instrument Sans, system-ui, sans-serif" },
+  inter:      { display: "Inter, system-ui, sans-serif",           body: "Inter, system-ui, sans-serif" },
+  dmsans:     { display: "DM Sans, system-ui, sans-serif",        body: "DM Sans, system-ui, sans-serif" },
+}
+
+/**
+ * Enriches config.theme with industry-aware defaults from auto-style-engine.
+ * Respects user-provided theme fields (locks) — only fills in gaps.
+ */
+function applyAutoStyle(config, rawInput) {
+  const rawTheme = rawInput?.theme || {}
+
+  // Determine locks: which theme fields the user explicitly provided
+  const locks = {
+    preset:     Boolean(rawTheme.preset),
+    typography: Boolean(rawTheme.font?.display || rawTheme.font?.body),
+    density:    Boolean(rawTheme.density),
+    colors:     Boolean(rawTheme.brand?.primary || rawTheme.brand?.accent),
+    fx:         false,  // FX not yet rendered by compiler — always auto-derive for future use
+  }
+
+  // Build context
+  const context = {
+    locks,
+    industryKey:  config.site.industry,
+    logoColors:   rawInput?.assets?.logoColors || [],
+  }
+
+  const result = autoStyleEngine({}, context)
+
+  // Apply to config.theme (only unlocked fields)
+  if (!locks.preset && result.stylePreset) {
+    config.theme.preset = result.stylePreset
+  }
+  if (!locks.density && result.designDensity) {
+    config.theme.density = result.designDensity
+  }
+  if (!locks.colors) {
+    if (result.primaryColor) {
+      config.theme.brand = config.theme.brand || {}
+      config.theme.brand.primary = result.primaryColor
+    }
+    if (result.accentColor) {
+      config.theme.brand = config.theme.brand || {}
+      config.theme.brand.accent = result.accentColor
+    }
+  }
+  if (!locks.typography && result.fontStack && FONT_STACKS[result.fontStack]) {
+    config.theme.font = config.theme.font || {}
+    config.theme.font.display = config.theme.font.display || FONT_STACKS[result.fontStack].display
+    config.theme.font.body    = config.theme.font.body    || FONT_STACKS[result.fontStack].body
+  }
 }
 
 function compileMeta(page, config) {
