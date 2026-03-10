@@ -151,44 +151,46 @@ function validate(schema, data, path = "#", rootSchema = null) {
   return errors
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+export { validate }
+
+// ── Main (nur wenn direkt aufgerufen) ─────────────────────────────────────────
 
 const inputFile = process.argv[2]
-if (!inputFile) {
+if (inputFile) {
+  const dslPath    = resolve(process.cwd(), inputFile)
+  const schemaPath = resolve(__dir, "site.schema.json")
+
+  let dsl, schema
+  try {
+    dsl    = JSON.parse(readFileSync(dslPath, "utf8"))
+    schema = JSON.parse(readFileSync(schemaPath, "utf8"))
+  } catch (e) {
+    console.error(`❌ Fehler beim Lesen: ${e.message}`)
+    process.exit(1)
+  }
+
+  let errors
+  try {
+    errors = validate(schema, dsl)
+  } catch (e) {
+    console.error(`❌ Validierungs-Fehler: ${e.message}`)
+    process.exit(1)
+  }
+
+  if (errors.length === 0) {
+    console.log(`✅ ${inputFile} ist valid.`)
+    console.log(`   Site:     ${dsl.site?.name}`)
+    console.log(`   Industry: ${dsl.site?.industry}`)
+    console.log(`   Theme:    ${dsl.theme?.preset}`)
+    console.log(`   Pages:    ${dsl.pages?.length}`)
+    const totalSections = dsl.pages?.reduce((n, p) => n + (p.sections?.length || 0), 0)
+    console.log(`   Sections: ${totalSections}`)
+  } else {
+    console.error(`❌ ${errors.length} Fehler in ${inputFile}:\n`)
+    errors.forEach(e => console.error(`  • ${e}`))
+    process.exit(1)
+  }
+} else if (process.argv[1]?.endsWith("validate.js")) {
   console.error("Usage: node schema/validate.js <dsl-file.json>")
-  process.exit(1)
-}
-
-const dslPath    = resolve(process.cwd(), inputFile)
-const schemaPath = resolve(__dir, "site.schema.json")
-
-let dsl, schema
-try {
-  dsl    = JSON.parse(readFileSync(dslPath, "utf8"))
-  schema = JSON.parse(readFileSync(schemaPath, "utf8"))
-} catch (e) {
-  console.error(`❌ Fehler beim Lesen: ${e.message}`)
-  process.exit(1)
-}
-
-let errors
-try {
-  errors = validate(schema, dsl)
-} catch (e) {
-  console.error(`❌ Validierungs-Fehler: ${e.message}`)
-  process.exit(1)
-}
-
-if (errors.length === 0) {
-  console.log(`✅ ${inputFile} ist valid.`)
-  console.log(`   Site:     ${dsl.site?.name}`)
-  console.log(`   Industry: ${dsl.site?.industry}`)
-  console.log(`   Theme:    ${dsl.theme?.preset}`)
-  console.log(`   Pages:    ${dsl.pages?.length}`)
-  const totalSections = dsl.pages?.reduce((n, p) => n + (p.sections?.length || 0), 0)
-  console.log(`   Sections: ${totalSections}`)
-} else {
-  console.error(`❌ ${errors.length} Fehler in ${inputFile}:\n`)
-  errors.forEach(e => console.error(`  • ${e}`))
   process.exit(1)
 }

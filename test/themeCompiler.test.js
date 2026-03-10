@@ -62,9 +62,21 @@ describe("compileTheme()", () => {
     assert.ok(css.includes("#ff0000"))
   })
 
-  it("applies font overrides", () => {
+  it("applies bare font override with system-ui fallback", () => {
     const css = compileTheme({ preset: "swiss", density: "balanced", font: { display: "Roboto" } })
-    assert.ok(css.includes("Roboto"))
+    assert.ok(css.includes("Roboto, system-ui, sans-serif"))
+  })
+
+  it("passes through complete font stack without duplicating fallbacks", () => {
+    const css = compileTheme({
+      preset: "swiss", density: "balanced",
+      font: { display: "Playfair Display, Georgia, serif", body: "Inter, system-ui, sans-serif" }
+    })
+    // Must NOT double-append system-ui
+    assert.ok(css.includes("Playfair Display, Georgia, serif"))
+    assert.ok(!css.includes("Playfair Display, Georgia, serif, system-ui"))
+    assert.ok(css.includes("Inter, system-ui, sans-serif"))
+    assert.ok(!css.includes("Inter, system-ui, sans-serif, system-ui"))
   })
 
   it("compact density scales spacing down", () => {

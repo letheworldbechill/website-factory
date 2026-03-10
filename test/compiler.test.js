@@ -102,6 +102,24 @@ describe("compileSite() — integration", () => {
     assert.ok(html.includes("Playfair Display"))
   })
 
+  it("produces clean font stacks without duplication", () => {
+    const html = compileSite({ site: { name: "X", industry: "kanzlei" } })
+    // Kanzlei → serif stack → "Playfair Display, Georgia, serif"
+    // Must NOT contain doubled fallbacks
+    assert.ok(html.includes("Playfair Display, Georgia, serif"))
+    assert.ok(!html.includes("Playfair Display, Georgia, serif, system-ui"))
+  })
+
+  it("produces clean sans-serif font stacks without duplication", () => {
+    const html = compileSite({ site: { name: "X", industry: "it" } })
+    // IT → inter stack → "Inter, system-ui, sans-serif"
+    // Must appear exactly once, not doubled
+    const css = html.match(/--font-display:\s*([^;]+)/)?.[1]
+    assert.ok(css, "CSS should contain --font-display")
+    const occurrences = (css.match(/system-ui/g) || []).length
+    assert.equal(occurrences, 1, `system-ui should appear once in font-display, got: ${css}`)
+  })
+
   it("respects user theme overrides (locks)", () => {
     const input = {
       site: { name: "Test", industry: "kanzlei" },

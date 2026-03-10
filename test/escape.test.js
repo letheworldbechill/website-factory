@@ -76,8 +76,8 @@ describe("escUrl()", () => {
     assert.equal(escUrl("vbscript:MsgBox('XSS')"), "#")
   })
 
-  it("allows normal URLs and escapes them", () => {
-    assert.equal(escUrl("https://example.com"), "https:&#x2F;&#x2F;example.com")
+  it("allows normal URLs without escaping slashes", () => {
+    assert.equal(escUrl("https://example.com"), "https://example.com")
   })
 
   it("allows fragment URLs", () => {
@@ -88,9 +88,15 @@ describe("escUrl()", () => {
     assert.equal(escUrl("  #section  "), "#section")
   })
 
-  it("allows relative URLs", () => {
-    const result = escUrl("/page/about")
-    assert.ok(result.includes("page"))
-    assert.notEqual(result, "#")
+  it("allows relative URLs with slashes intact", () => {
+    assert.equal(escUrl("/page/about"), "/page/about")
+  })
+
+  it("escapes ampersands in URLs", () => {
+    assert.equal(escUrl("https://example.com?a=1&b=2"), "https://example.com?a=1&amp;b=2")
+  })
+
+  it("escapes quotes in URLs", () => {
+    assert.equal(escUrl('https://example.com?q="test"'), 'https://example.com?q=&quot;test&quot;')
   })
 })

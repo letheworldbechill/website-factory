@@ -170,10 +170,16 @@ export function compileTheme(theme) {
   }
 
   // Font-Overrides anwenden
+  // If the override already contains a comma it is a complete stack (e.g. from
+  // auto-style-engine); pass it through as-is to avoid duplicated fallbacks.
   const fonts = {
-    display: theme.font?.display ? `${theme.font.display}, system-ui, sans-serif` : base.fontDisplay,
-    body:    theme.font?.body    ? `${theme.font.body}, system-ui, sans-serif`    : base.fontBody,
-    mono:    theme.font?.mono    || "ui-monospace, SFMono-Regular, Menlo, monospace",
+    display: theme.font?.display
+      ? (theme.font.display.includes(",") ? theme.font.display : `${theme.font.display}, system-ui, sans-serif`)
+      : base.fontDisplay,
+    body: theme.font?.body
+      ? (theme.font.body.includes(",") ? theme.font.body : `${theme.font.body}, system-ui, sans-serif`)
+      : base.fontBody,
+    mono: theme.font?.mono || "ui-monospace, SFMono-Regular, Menlo, monospace",
   }
 
   // Spacing-Skala (4px-Grid × scale)
