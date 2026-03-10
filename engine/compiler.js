@@ -20,6 +20,7 @@ import { composePage }      from "./pageComposer.js"
 import { composeSections }  from "./sectionComposer.js"
 import { renderSection }    from "./renderer.js"
 import { compileTheme }     from "../design/themeCompiler.js"
+import { compileHeaderScript } from "../patterns/header.js"
 import { esc }              from "./escape.js"
 
 /**
@@ -67,13 +68,22 @@ function compilePage(page, config) {
     sections = composeSections(types, config.site.industry)
   }
 
+  // Pass sibling sections to renderer for header nav auto-generation
+  const renderConfig = { ...config, _pageSections: sections }
+
   const body = sections
-    .map(section => renderSection(section, config))
+    .map(section => renderSection(section, renderConfig))
     .join("\n")
 
   const meta = compileMeta(page, config)
   const css  = compileTheme(config.theme)
   const lang = esc(config.site.language || "de")
+
+  const hasHeader = sections.some(s => s.type === "header" && s.enabled !== false)
+  const headerPadding = hasHeader
+    ? "\n:root { --header-h: 64px; }\n@media (max-width: 768px) { :root { --header-h: 56px; } }\nbody { padding-top: var(--header-h); }"
+    : ""
+  const headerScript = hasHeader ? "\n" + compileHeaderScript() : ""
 
   return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -86,12 +96,12 @@ ${meta}
 html { scroll-behavior: smooth; }
 body { font-family: var(--font-body); background: var(--c-bg); color: var(--c-text); line-height: 1.5; -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
-img { max-width: 100%; display: block; }
+img { max-width: 100%; display: block; }${headerPadding}
 ${css}
 </style>
 </head>
 <body>
-${body}
+${body}${headerScript}
 </body>
 </html>`
 }
